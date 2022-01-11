@@ -10,4 +10,6 @@ export const Opcode = {
   ValidateFailed: $(1, HttpStatus.BAD_REQUEST, 'ValidateFailed'),
   ExistsPricingName: $(2, HttpStatus.CONFLICT, 'ExistsPricingName'),
   CannotFindPricing: $(3, HttpStatus.NOT_FOUND, 'CannotFindPricing'),
+  ExistsAddonName: $(4, HttpStatus.CONFLICT, 'ExistsAddonName'),
+  CannotFindAddon: $(5, HttpStatus.NOT_FOUND, 'CannotFindAddon'),
 };
