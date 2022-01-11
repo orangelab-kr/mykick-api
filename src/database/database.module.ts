@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { Addon } from '../addon/entities/addon.entity';
+import { Phone } from '../auth/phone/entities/phone.entity';
 import { Pricing } from '../pricing/entities/pricing.entity';
 import { User } from '../user/entities/user.entity';
 
@@ -14,9 +15,9 @@ import { User } from '../user/entities/user.entity';
       username: _.get(process.env, 'DB_USERNAME', 'root'),
       password: _.get(process.env, 'DB_PASSWORD'),
       database: _.get(process.env, 'DB_DATABASE', 'mykick'),
+      entities: [Pricing, Addon, User, Phone],
       keepConnectionAlive: true,
-      entities: [Pricing, Addon, User],
-      synchronize: true,
+      synchronize: false,
     }),
   ],
 })

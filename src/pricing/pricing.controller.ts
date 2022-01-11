@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { ApiParam } from '@nestjs/swagger';
-import { CreatePricingDto } from 'src/pricing/dto/create-pricing.dto';
-import { UpdatePricingDto } from 'src/pricing/dto/update-pricing.dto';
-import { PricingService } from 'src/pricing/pricing.service';
+import { CreatePricingDto } from './dto/create-pricing.dto';
+import { UpdatePricingDto } from './dto/update-pricing.dto';
+import { PricingService } from './pricing.service';
 import { PricingDecorator } from './pricing.decorator';
 
 @Controller({ path: 'pricings', version: '1' })
