@@ -12,6 +12,8 @@ import { PricingService } from './pricing.service';
 })
 export class PricingModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(PricingMiddleware).forRoutes('/v1/pricings/:pricingId');
+    consumer
+      .apply(PricingMiddleware)
+      .forRoutes('/:version/pricings/:pricingId');
   }
 }

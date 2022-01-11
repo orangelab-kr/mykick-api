@@ -12,6 +12,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 })
 export class AddonModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AddonMiddleware).forRoutes('/v1/addons/:addonId');
+    consumer.apply(AddonMiddleware).forRoutes('/:version/addons/:addonId');
   }
 }

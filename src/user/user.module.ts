@@ -6,12 +6,13 @@ import { User } from './entities/user.entity';
 import { UserMiddleware } from './user.middleware';
 
 @Module({
+  exports: [UserService],
   imports: [TypeOrmModule.forFeature([User])],
   controllers: [UserController],
   providers: [UserService],
 })
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(UserMiddleware).forRoutes('/v1/users/:userId');
+    consumer.apply(UserMiddleware).forRoutes('/:version/users/:userId');
   }
 }
