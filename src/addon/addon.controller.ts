@@ -10,8 +10,8 @@ export class AddonController {
   constructor(private readonly addonService: AddonService) {}
 
   @Post()
-  async create(@Body() createAddonDto: CreateAddonDto) {
-    const addon = await this.addonService.create(createAddonDto);
+  async create(@Body() body: CreateAddonDto) {
+    const addon = await this.addonService.create(body);
     return { addon };
   }
 
@@ -22,20 +22,17 @@ export class AddonController {
   }
 
   @Get(':addonId')
-  findOne(@AddonDecorator() addon: Addon) {
+  async findOne(@AddonDecorator() addon: Addon) {
     return { addon };
   }
 
   @Patch(':addonId')
-  update(
-    @AddonDecorator() addon: Addon,
-    @Body() updateAddonDto: UpdateAddonDto,
-  ) {
-    return this.addonService.update(addon, updateAddonDto);
+  async update(@AddonDecorator() addon: Addon, @Body() body: UpdateAddonDto) {
+    return this.addonService.update(addon, body);
   }
 
   @Delete(':addonId')
-  remove(@AddonDecorator() addon: Addon) {
+  async remove(@AddonDecorator() addon: Addon) {
     return this.addonService.remove(addon);
   }
 }

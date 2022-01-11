@@ -11,8 +11,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    const user = await this.userService.create(createUserDto);
+  async create(@Body() body: CreateUserDto) {
+    const user = await this.userService.create(body);
     return { user };
   }
 
@@ -30,11 +30,8 @@ export class UserController {
 
   @Patch(':userId')
   @ApiParam({ name: 'userId', description: '사용자 ID' })
-  async update(
-    @UserDecorator() beforeUser: User,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
-    const user = await this.userService.update(beforeUser, updateUserDto);
+  async update(@UserDecorator() beforeUser: User, @Body() body: UpdateUserDto) {
+    const user = await this.userService.update(beforeUser, body);
     return { user };
   }
 

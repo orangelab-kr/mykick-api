@@ -10,8 +10,8 @@ export class PricingController {
   constructor(private readonly pricingService: PricingService) {}
 
   @Post()
-  async create(@Body() createPricingDto: CreatePricingDto) {
-    const pricing = await this.pricingService.create(createPricingDto);
+  async create(@Body() body: CreatePricingDto) {
+    const pricing = await this.pricingService.create(body);
     return { pricing };
   }
 
@@ -22,27 +22,23 @@ export class PricingController {
   }
 
   @Get(':pricingId')
-  @ApiParam({ name: 'pricingId' })
+  @ApiParam({ name: 'pricingId', description: '가격표 ID' })
   async findOne(@PricingDecorator() pricing) {
     return pricing;
   }
 
   @Patch(':pricingId')
-  @ApiParam({ name: 'pricingId' })
+  @ApiParam({ name: 'pricingId', description: '가격표 ID' })
   async update(
     @PricingDecorator() beforePricing,
-    @Body() updatePricingDto: UpdatePricingDto,
+    @Body() body: UpdatePricingDto,
   ) {
-    const pricing = await this.pricingService.update(
-      beforePricing,
-      updatePricingDto,
-    );
-
+    const pricing = await this.pricingService.update(beforePricing, body);
     return { pricing };
   }
 
   @Delete(':pricingId')
-  @ApiParam({ name: 'pricingId' })
+  @ApiParam({ name: 'pricingId', description: '가격표 ID' })
   async remove(@PricingDecorator() pricing) {
     await this.pricingService.remove(pricing);
   }
