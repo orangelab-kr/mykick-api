@@ -5,7 +5,7 @@ import { getFromContainer, MetadataStorage } from 'class-validator';
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import _ from 'lodash';
 import { AppModule } from './app/app.module';
-import { WrapperInterceptor } from './common/interceptors/warpper.interceptor';
+import { WrapperInterceptor } from './common/interceptors/wrapper.interceptor';
 import { validationPipe } from './common/pipes/validation';
 declare const module: any;
 
@@ -30,7 +30,8 @@ async function bootstrap() {
   );
 
   SwaggerModule.setup('docs', app, document);
-  await app.listen(3000);
+  await app.listen(_.parseInt(_.get(process.env, 'PORT', '3000')));
+
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
