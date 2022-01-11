@@ -6,7 +6,7 @@ import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import _ from 'lodash';
 import { AppModule } from './app/app.module';
 import { WrapperInterceptor } from './common/interceptors/wrapper.interceptor';
-import { validationPipe } from './common/pipes/validation';
+import { validationPipe } from './common/pipes/validation.pipe';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
