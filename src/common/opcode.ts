@@ -5,4 +5,9 @@ function $(opcode: number, statusCode: number, message?: string) {
     new HttpException({ opcode, message, ...details }, statusCode);
 }
 
-export const Opcode = {};
+export const Opcode = {
+  Success: $(0, HttpStatus.OK, 'Success'),
+  ValidateFailed: $(1, HttpStatus.BAD_REQUEST, 'ValidateFailed'),
+  ExistsPricingName: $(2, HttpStatus.CONFLICT, 'ExistsPricingName'),
+  CannotFindPricing: $(3, HttpStatus.NOT_FOUND, 'CannotFindPricing'),
+};
