@@ -8,6 +8,6 @@ export class AppController {
 
   @Get()
   getClusterInfo(): ClusterInfo {
-    return this.appService.getClusterInfo();
+    return this.appService.getClusterInfoFromCache();
   }
 }
