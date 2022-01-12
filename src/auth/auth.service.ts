@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import _ from 'lodash';
 import { User } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
@@ -7,6 +7,8 @@ import { PhoneService } from './phone/phone.service';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly userService: UserService,
     private readonly phoneService: PhoneService,
@@ -17,6 +19,10 @@ export class AuthService {
     const data = _.merge(_.omit(payload, 'phoneId'), _.pick(phone, 'phoneNo'));
     const user = await this.userService.create(data);
     await this.phoneService.revoke(phone);
+    this.logger.log(
+      `${user.name}(${user.userId}) has been successfully sign up!`,
+    );
+
     return user;
   }
 }

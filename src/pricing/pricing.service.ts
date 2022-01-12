@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Opcode } from '../common/opcode';
@@ -8,6 +8,8 @@ import { Pricing } from './entities/pricing.entity';
 
 @Injectable()
 export class PricingService {
+  private readonly logger = new Logger(PricingService.name);
+
   constructor(
     @InjectRepository(Pricing)
     private readonly pricingRepository: Repository<Pricing>,
@@ -16,6 +18,7 @@ export class PricingService {
   async create(payload: CreatePricingDto) {
     const pricing = await this.getByName(payload.name);
     if (pricing) throw Opcode.ExistsPricingName({ pricing });
+    this.logger.log(`${payload.name}(${pricing.pricingId}) has been created`);
     return this.pricingRepository.create(payload).save();
   }
 
@@ -38,10 +41,12 @@ export class PricingService {
   }
 
   async update(pricing: Pricing, payload: UpdatePricingDto): Promise<Pricing> {
+    this.logger.log(`${pricing.name}(${pricing.pricingId}) has been updated.`);
     return this.pricingRepository.merge(pricing, payload).save();
   }
 
   async remove(pricing: Pricing): Promise<void> {
     await pricing.remove();
+    this.logger.log(`${pricing.name}(${pricing.pricingId}) has been deleted.`);
   }
 }

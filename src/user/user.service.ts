@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Opcode } from '../common/opcode';
@@ -8,6 +8,8 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -16,6 +18,7 @@ export class UserService {
   async create(payload: CreateUserDto) {
     const user = await this.getByName(payload.name);
     if (user) throw Opcode.ExistsUserPhoneNo({ user });
+    this.logger.log(`${user.name}(${user.userId}) has successfully created.`);
     return this.userRepository.create(payload).save();
   }
 
@@ -38,6 +41,7 @@ export class UserService {
   }
 
   async update(user: User, payload: UpdateUserDto): Promise<User> {
+    this.logger.log(`${user.name}(${user.name}) has been updated.`);
     return this.userRepository.merge(user, payload).save();
   }
 
