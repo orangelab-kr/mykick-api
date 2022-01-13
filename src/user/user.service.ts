@@ -26,6 +26,10 @@ export class UserService {
     return this.userRepository.findOne({ name });
   }
 
+  async getByPhone(phoneNo: string): Promise<User | null> {
+    return this.userRepository.findOne({ phoneNo });
+  }
+
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
@@ -36,6 +40,12 @@ export class UserService {
 
   async findOneOrThrow(userId: string): Promise<User> {
     const user = await this.findOne(userId);
+    if (!user) throw Opcode.CannotFindUser();
+    return user;
+  }
+
+  async getByPhoneOrThrow(phoneNo: string): Promise<User> {
+    const user = await this.getByPhone(phoneNo);
     if (!user) throw Opcode.CannotFindUser();
     return user;
   }

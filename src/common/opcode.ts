@@ -14,8 +14,9 @@ export const Opcode = {
   ExistsAddonName: $(5, HttpStatus.CONFLICT, 'ExistsAddonName'),
   CannotFindAddon: $(6, HttpStatus.NOT_FOUND, 'CannotFindAddon'),
   ExistsUserPhoneNo: $(7, HttpStatus.CONFLICT, 'ExistsUserPhoneNo'),
-  CannotFindUser: $(8, HttpStatus.NOT_FOUND, 'ExistsUserPhoneNo'),
+  CannotFindUser: $(8, HttpStatus.NOT_FOUND, 'CannotFindUser'),
   PhoneDaliyLimit: $(9, HttpStatus.TOO_MANY_REQUESTS, 'PhoneDaliyLimit'),
   InvalidVerifyCode: $(9, HttpStatus.NOT_FOUND, 'InvalidVerifyCode'),
   InvalidPhone: $(10, HttpStatus.NOT_FOUND, 'InvalidPhone'),
+  InvalidSession: $(10, HttpStatus.NOT_FOUND, 'InvalidSession'),
 };

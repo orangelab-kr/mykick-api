@@ -8,9 +8,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Session } from '../session/entities/session.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -42,12 +44,15 @@ export class User extends BaseEntity {
   })
   address: string;
 
-  @ApiProperty({ example: dayjs() })
+  @OneToMany(() => Session, (session) => session.user)
+  sessions: Session[];
+
   @CreateDateColumn()
+  @ApiProperty({ example: dayjs() })
   createdAt: Date;
 
-  @ApiProperty({ example: dayjs() })
   @UpdateDateColumn()
+  @ApiProperty({ example: dayjs() })
   updatedAt: Date;
 
   @BeforeInsert()
