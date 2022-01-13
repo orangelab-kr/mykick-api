@@ -21,6 +21,12 @@ async function bootstrap() {
     .setTitle('Mykick API')
     .setDescription('Rent a kickboard and use it freely.')
     .setVersion('1.0.0')
+    .addBearerAuth({
+      description: '인증 토큰',
+      name: 'Authorization',
+      type: 'http',
+      in: 'Header',
+    })
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

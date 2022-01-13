@@ -1,11 +1,12 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { CreatePricingDto } from './dto/create-pricing.dto';
 import { UpdatePricingDto } from './dto/update-pricing.dto';
 import { PricingService } from './pricing.service';
 import { PricingDecorator } from './pricing.decorator';
 
 @Controller({ path: 'pricings', version: '1' })
+@ApiBearerAuth()
 export class PricingController {
   constructor(private readonly pricingService: PricingService) {}
 

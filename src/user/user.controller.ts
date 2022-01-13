@@ -4,9 +4,10 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 
-@Controller({ path: 'users', version: '1' })
+@Controller({ version: '1' })
+@ApiBearerAuth()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
