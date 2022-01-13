@@ -27,12 +27,20 @@ export class AppService implements OnModuleInit {
     this.logger.log('- Cluster Information -');
     this.logger.log(`Cluster name: ${clusterInfo.hostname}`);
     this.logger.log(`Cluster mode: ${this.DisplayMode[clusterInfo.mode]}`);
+    this.clusterInfo = clusterInfo;
   }
 
   async getClusterInfo(): Promise<ClusterInfo> {
     const packagePath = path.join(process.cwd(), 'package.json');
     const packageFile = await readFile(packagePath);
-    const packageJson: PackageInfo = JSON.parse(packageFile.toString());
+    const packageJson: PackageInfo = _.pick(
+      JSON.parse(packageFile.toString()),
+      'name',
+      'version',
+      'description',
+      'author',
+    );
+
     const mode = process.env.NODE_ENV || 'prd';
     const hostname = os.hostname();
     return { ...packageJson, hostname, mode };
