@@ -19,4 +19,7 @@ export const Opcode = {
   InvalidVerifyCode: $(9, HttpStatus.NOT_FOUND, 'InvalidVerifyCode'),
   InvalidPhone: $(10, HttpStatus.NOT_FOUND, 'InvalidPhone'),
   InvalidSession: $(10, HttpStatus.NOT_FOUND, 'InvalidSession'),
+  CannotFindCard: $(11, HttpStatus.NOT_FOUND, 'CannotFindCard'),
+  CannotGetCheckout: $(12, HttpStatus.BAD_REQUEST, 'CannotGetCheckout'),
+  ExistsCardName: $(13, HttpStatus.BAD_REQUEST, 'ExistsCardName'),
 };

@@ -7,13 +7,16 @@ import { SessionService } from './session/session.service';
 import { UserController } from './user.controller';
 import { UserMiddleware } from './user.middleware';
 import { UserService } from './user.service';
+import { CardModule } from './card/card.module';
+import { CardService } from './card/card.service';
 
 @Module({
   exports: [UserService],
   controllers: [UserController],
-  providers: [UserService, SessionService],
+  providers: [UserService, SessionService, CardService],
   imports: [
     SessionModule,
+    CardModule,
     TypeOrmModule.forFeature([User]),
     RouterModule.register([
       {
@@ -23,6 +26,10 @@ import { UserService } from './user.service';
           {
             path: ':userId/sessions',
             module: SessionModule,
+          },
+          {
+            path: ':userId/cards',
+            module: CardModule,
           },
         ],
       },

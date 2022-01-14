@@ -7,6 +7,7 @@ import {
   BaseEntity,
   BeforeInsert,
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryColumn,
@@ -38,8 +39,9 @@ export class Session extends BaseEntity {
   @IsDate()
   usedAt: Date;
 
-  @ApiProperty({ description: '회원가입 일자', example: dayjs() })
   @IsDate()
+  @ApiProperty({ description: '회원가입 일자', example: dayjs() })
+  @CreateDateColumn()
   createdAt: Date;
 
   @ApiProperty({ example: dayjs() })

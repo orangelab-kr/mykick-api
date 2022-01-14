@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RouterModule } from '@nestjs/core';
+import { CardModule } from '../user/card/card.module';
 import { SessionModule } from '../user/session/session.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';
@@ -14,6 +15,7 @@ import { PhoneService } from './phone/phone.service';
     UserModule,
     PhoneModule,
     SessionModule,
+    CardModule,
     RouterModule.register([
       {
         path: 'auth',
@@ -22,6 +24,10 @@ import { PhoneService } from './phone/phone.service';
           {
             path: 'sessions',
             module: SessionModule,
+          },
+          {
+            path: 'cards',
+            module: CardModule,
           },
         ],
       },

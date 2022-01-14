@@ -43,12 +43,12 @@ export class SessionService {
     return { sessions, total };
   }
 
-  async get(sessionId: string): Promise<Session | null> {
-    return this.sessionRepository.findOne({ sessionId });
+  async get(user: User, sessionId: string): Promise<Session | null> {
+    return this.sessionRepository.findOne({ user, sessionId });
   }
 
-  async getOrThrow(sessionId: string): Promise<Session> {
-    const session = await this.get(sessionId);
+  async getOrThrow(user: User, sessionId: string): Promise<Session> {
+    const session = await this.get(user, sessionId);
     if (!session) throw Opcode.InvalidSession();
     return session;
   }
