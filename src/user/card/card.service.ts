@@ -104,7 +104,6 @@ export class CardService {
   }
 
   async remove(card: Card): Promise<void> {
-    const { cardId } = card;
     const billingKey =
       card.billingKey ||
       (await this.cardRepository

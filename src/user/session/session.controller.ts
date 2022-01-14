@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { User } from '../entities/user.entity';
 import { UserDecorator } from '../user.decorator';
 import { GetSessionsDto } from './dto/get-sessions.dto';

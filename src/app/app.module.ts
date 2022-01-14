@@ -2,13 +2,13 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AddonModule } from '../addon/addon.module';
 import { AuthMiddleware } from '../auth/auth.middleware';
 import { AuthModule } from '../auth/auth.module';
+import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
 import { DatabaseModule } from '../database/database.module';
 import { PricingModule } from '../pricing/pricing.module';
 import { SessionModule } from '../user/session/session.module';
 import { UserModule } from '../user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { LoggerMiddleware } from './logger.middleware';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ export class AppModule implements NestModule {
 
     consumer
       .apply(AuthMiddleware)
-      .exclude('/', 'auth/signin', 'auth/signup')
+      .exclude('/', 'auth/signin', 'auth/signup', 'pricings')
       .forRoutes('*');
   }
 }

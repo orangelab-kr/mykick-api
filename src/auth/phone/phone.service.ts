@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
-import { MoreThan, FindCondition, IsNull, Not, Repository } from 'typeorm';
+import superagent from 'superagent';
+import { FindCondition, IsNull, MoreThan, Repository } from 'typeorm';
 import { Opcode } from '../../common/opcode';
 import { RequestPhoneDto } from './dto/request-phone-dto';
 import { VerifyPhoneDto } from './dto/verify-phone-dto';
 import { Phone } from './entities/phone.entity';
-import superagent from 'superagent';
 
 @Injectable()
 export class PhoneService {

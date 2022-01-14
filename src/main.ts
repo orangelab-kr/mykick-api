@@ -1,13 +1,20 @@
 import { VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Callback, Context, Handler } from 'aws-lambda';
 import { getFromContainer, MetadataStorage } from 'class-validator';
 import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
-import _ from 'lodash';
 import helmet from 'helmet';
+import _ from 'lodash';
+import serverless from 'serverless-http';
 import { AppModule } from './app/app.module';
 import { WrapperInterceptor } from './common/interceptors/wrapper.interceptor';
 import { validationPipe } from './common/pipes/validation.pipe';
+
+declare global {
+  // eslint-disable-next-line no-var
+  var handler: Handler | undefined;
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -38,7 +45,17 @@ async function bootstrap() {
   );
 
   SwaggerModule.setup('docs', app, document);
-  await app.listen(_.parseInt(_.get(process.env, 'PORT', '3000')));
+  await app.init();
+
+  const adapterInstance = app.getHttpAdapter().getInstance();
+  return serverless(adapterInstance);
 }
 
-bootstrap();
+export const handler: Handler = async (
+  event: any,
+  context: Context,
+  callback: Callback,
+) => {
+  if (!global.handler) global.handler = await bootstrap();
+  return global.handler(event, context, callback);
+};

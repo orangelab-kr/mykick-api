@@ -1,7 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional } from 'class-validator';
-import _ from 'lodash';
-import { FindCondition, FindOneOptions } from 'typeorm';
 import { EntityFieldsNames } from 'typeorm/common/EntityFieldsNames';
 
 export enum RequestOrderByType {
