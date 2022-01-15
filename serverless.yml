@@ -31,15 +31,19 @@ package:
   individually: true
 
 plugins:
+  - serverless-webpack
   - serverless-offline
 
 custom:
+  webpack:
+    includeModules: true
+    packager: 'yarn'
   serverless-offline:
     noPrependStageInUrl: true
 
 functions:
   app:
-    handler: dist/main.handler
+    handler: src/main.handler
     events:
       - http:
           method: ANY
