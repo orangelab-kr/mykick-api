@@ -31,6 +31,7 @@ export class AppService implements OnModuleInit {
   }
 
   async getClusterInfo(): Promise<ClusterInfo> {
+    if (this.clusterInfo) return this.clusterInfo;
     const packagePath = path.join(process.cwd(), 'package.json');
     const packageFile = await readFile(packagePath);
     const packageJson: PackageInfo = _.pick(

@@ -3,6 +3,7 @@ import { AddonModule } from '../addon/addon.module';
 import { AuthMiddleware } from '../auth/auth.middleware';
 import { AuthModule } from '../auth/auth.module';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
+import { swaggerPath } from '../common/swagger';
 import { DatabaseModule } from '../database/database.module';
 import { PricingModule } from '../pricing/pricing.module';
 import { SessionModule } from '../user/session/session.module';
@@ -28,7 +29,7 @@ export class AppModule implements NestModule {
 
     consumer
       .apply(AuthMiddleware)
-      .exclude('/', 'auth/signin', 'auth/signup', 'pricings')
+      .exclude('/', 'auth/signin', 'auth/signup', 'pricings', 'addons')
       .forRoutes('*');
   }
 }
