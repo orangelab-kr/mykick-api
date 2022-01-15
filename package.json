@@ -15,6 +15,7 @@
     "start:offline": "doppler run --command \"sls offline\"",
     "start:debug": "doppler run --command \"nest start --debug --watch\"",
     "start:prod": "doppler run --command \"node dist/src/main\"",
+    "migrate": "doppler run --command \"typeorm schema:sync\"",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",

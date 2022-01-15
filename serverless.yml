@@ -50,6 +50,8 @@ functions:
     handler: src/main.handler
     events:
       - http:
-          cors: true
           method: ANY
-          path: /{proxy+}
+          path: /
+      - http:
+          method: ANY
+          path: '{proxy+}'
