@@ -5,13 +5,18 @@ import { validationMetadatasToSchemas } from 'class-validator-jsonschema';
 import _ from 'lodash';
 import { AppService } from '../app/app.service';
 
-export const swaggerPath = 'api';
+export const swaggerPath = 'docs';
 export const setupSwagger = async (app: INestApplication) => {
   const clusterInfo = await new AppService().getClusterInfo();
   const config = new DocumentBuilder()
     .setTitle(clusterInfo.name)
     .setDescription(clusterInfo.description)
     .setVersion(clusterInfo.version)
+    .addTag('서버', '서버 상태를 관리합니다.')
+    .addTag('인증', '로그인 및 인증과 관련된 일을 처리합니다.')
+    .addTag('가격표', '계약 기간, 금액을 관리합니다.')
+    .addTag('부가상품', '부가상품을 관리합니다.')
+    .addTag('사용자', '사용자를 관리합니다.')
     .addBearerAuth({
       description: '인증 토큰',
       name: 'Authorization',

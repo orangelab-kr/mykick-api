@@ -22,6 +22,10 @@ import { PhoneService } from './phone/phone.service';
         module: AuthModule,
         children: [
           {
+            path: 'phone',
+            module: PhoneModule,
+          },
+          {
             path: 'sessions',
             module: SessionModule,
           },

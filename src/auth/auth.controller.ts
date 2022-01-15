@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
 import { SessionService } from '../user/session/session.service';
 import { UserDecorator } from '../user/user.decorator';
@@ -7,6 +7,7 @@ import { AuthService } from './auth.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
 
+@ApiTags('인증')
 @Controller({ version: '1' })
 export class AuthController {
   constructor(

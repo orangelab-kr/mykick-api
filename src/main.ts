@@ -1,6 +1,7 @@
 import { VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { Callback, Context, Handler } from 'aws-lambda';
+import compression from 'compression';
 import helmet from 'helmet';
 import _ from 'lodash';
 import serverless from 'serverless-http';
@@ -18,6 +19,7 @@ async function bootstrap(isServerless = false) {
   const app = await NestFactory.create(AppModule);
 
   app.use(helmet());
+  app.use(compression());
   app.useGlobalInterceptors(new WrapperInterceptor());
   app.enableVersioning({ type: VersioningType.URI });
   app.useGlobalPipes(validationPipe());

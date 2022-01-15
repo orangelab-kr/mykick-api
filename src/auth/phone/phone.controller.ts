@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequestPhoneDto } from './dto/request-phone-dto';
 import { VerifyPhoneDto } from './dto/verify-phone-dto';
 import { PhoneService } from './phone.service';
 
-@Controller({ path: 'phone', version: '1' })
-@ApiBearerAuth()
+@ApiTags('인증')
+@Controller({ version: '1' })
 export class PhoneController {
   constructor(private readonly phoneService: PhoneService) {}
 

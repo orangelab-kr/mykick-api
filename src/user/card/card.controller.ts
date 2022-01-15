@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Patch } from '@nestjs/common';
-import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { User } from '../entities/user.entity';
 import { UserDecorator } from '../user.decorator';
 import { CardDecorator } from './card.decorator';
@@ -7,6 +7,7 @@ import { CardService } from './card.service';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { Card } from './entities/card.entity';
 
+@ApiTags('사용자', '인증')
 @Controller({ version: '1' })
 @ApiBearerAuth()
 export class CardController {

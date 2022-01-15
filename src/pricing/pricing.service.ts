@@ -18,8 +18,12 @@ export class PricingService {
   async create(payload: CreatePricingDto) {
     const pricing = await this.getByName(payload.name);
     if (pricing) throw Opcode.ExistsPricingName({ pricing });
-    this.logger.log(`${payload.name}(${pricing.pricingId}) has been created`);
-    return this.pricingRepository.create(payload).save();
+    const newPricing = await this.pricingRepository.create(payload).save();
+    this.logger.log(
+      `${newPricing.name}(${newPricing.pricingId}) has been created`,
+    );
+
+    return newPricing;
   }
 
   async getByName(name: string): Promise<Pricing | null> {

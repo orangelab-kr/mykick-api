@@ -38,14 +38,14 @@ export class Pricing extends BaseEntity {
   @IsInt({ message: '반드시 숫자여야 합니다.' })
   @Min(500, { message: '최소 500원부터 설정할 수 있습니다.' })
   @Max(1000000, { message: '최소 100만원을 초과할 수 없습니다.' })
-  price: number;
+  monthlyPrice: number;
 
   @Column()
-  @ApiProperty({ description: '이용할 계약기간(일)', example: 180 })
+  @ApiProperty({ description: '이용할 계약기간(개월)', example: 6 })
   @IsInt({ message: '반드시 숫자여야 합니다.' })
-  @Min(1, { message: '최소 1일부터 지정 가능합니다.' })
-  @Max(3650, { message: '최소 10년을 초과할 수 없습니다.' })
-  periodDays: number;
+  @Min(1, { message: '최소 1개월부터 지정 가능합니다.' })
+  @Max(120, { message: '최소 120개월 초과할 수 없습니다.' })
+  periodMonths: number;
 
   @ApiProperty({ example: dayjs() })
   @CreateDateColumn()

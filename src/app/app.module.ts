@@ -1,9 +1,13 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AddonModule } from '../addon/addon.module';
 import { AuthMiddleware } from '../auth/auth.middleware';
 import { AuthModule } from '../auth/auth.module';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
-import { swaggerPath } from '../common/swagger';
 import { DatabaseModule } from '../database/database.module';
 import { PricingModule } from '../pricing/pricing.module';
 import { SessionModule } from '../user/session/session.module';
@@ -29,7 +33,18 @@ export class AppModule implements NestModule {
 
     consumer
       .apply(AuthMiddleware)
-      .exclude('/', 'auth/signin', 'auth/signup', 'pricings', 'addons')
+      .exclude(
+        { path: '/', method: RequestMethod.GET },
+        /** Auth */
+        { path: '/:version/auth/signin', method: RequestMethod.POST },
+        { path: '/:version/auth/signup', method: RequestMethod.POST },
+        /** Pricings */
+        { path: '/:version/pricings', method: RequestMethod.GET },
+        { path: '/:version/pricings/:pricingId', method: RequestMethod.GET },
+        /** Addon */
+        { path: '/:version/addons', method: RequestMethod.GET },
+        { path: '/:version/addons/:pricingId', method: RequestMethod.GET },
+      )
       .forRoutes('*');
   }
 }
