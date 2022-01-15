@@ -1,8 +1,6 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { readFile } from 'fs/promises';
 import _ from 'lodash';
 import os from 'os';
-import path from 'path';
 import { ClusterInfo } from './interfaces/clusterInfo.interface';
 import { PackageInfo } from './interfaces/packageInfo.interface';
 
@@ -32,10 +30,9 @@ export class AppService implements OnModuleInit {
 
   async getClusterInfo(): Promise<ClusterInfo> {
     if (this.clusterInfo) return this.clusterInfo;
-    const packagePath = path.join(process.cwd(), 'package.json');
-    const packageFile = await readFile(packagePath);
+    const packageFile = await import('../../package.json');
     const packageJson: PackageInfo = _.pick(
-      JSON.parse(packageFile.toString()),
+      packageFile,
       'name',
       'version',
       'description',

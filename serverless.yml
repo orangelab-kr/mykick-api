@@ -36,8 +36,12 @@ plugins:
 
 custom:
   webpack:
-    includeModules: true
     packager: 'yarn'
+    includeModules:
+      forceInclude:
+        - '@nestjs/platform-express'
+        - 'mysql2'
+        - 'swagger-ui-express'
   serverless-offline:
     noPrependStageInUrl: true
 
@@ -46,8 +50,6 @@ functions:
     handler: src/main.handler
     events:
       - http:
+          cors: true
           method: ANY
-          path: /
-      - http:
-          method: ANY
-          path: '{proxy+}'
+          path: /{proxy+}
