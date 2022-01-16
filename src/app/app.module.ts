@@ -10,6 +10,7 @@ import { AuthModule } from '../auth/auth.module';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
 import { DatabaseModule } from '../database/database.module';
 import { PricingModule } from '../pricing/pricing.module';
+import { RentModule } from '../rent/rent.module';
 import { SessionModule } from '../user/session/session.module';
 import { UserModule } from '../user/user.module';
 import { AppController } from './app.controller';
@@ -23,6 +24,7 @@ import { AppService } from './app.service';
     UserModule,
     AuthModule,
     SessionModule,
+    RentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

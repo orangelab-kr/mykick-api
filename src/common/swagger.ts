@@ -14,6 +14,7 @@ export const setupSwagger = async (app: INestApplication) => {
     .setVersion(clusterInfo.version)
     .addTag('서버', '서버 상태를 관리합니다.')
     .addTag('인증', '로그인 및 인증과 관련된 일을 처리합니다.')
+    .addTag('렌트', '렌트를 요청하고 관리합니다.')
     .addTag('가격표', '계약 기간, 금액을 관리합니다.')
     .addTag('부가상품', '부가상품을 관리합니다.')
     .addTag('사용자', '사용자를 관리합니다.')

@@ -7,6 +7,7 @@ import { PricingService } from './pricing.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Pricing])],
+  exports: [TypeOrmModule.forFeature([Pricing]), PricingService],
   controllers: [PricingController],
   providers: [PricingService],
 })

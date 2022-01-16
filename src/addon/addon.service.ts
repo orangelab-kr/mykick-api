@@ -37,6 +37,10 @@ export class AddonService {
     return addon;
   }
 
+  async getMany(addonIds: string[]): Promise<Addon[]> {
+    return this.addonRepository.findByIds(addonIds);
+  }
+
   async update(addon: Addon, payload: UpdateAddonDto): Promise<Addon> {
     return this.addonRepository.merge(addon, payload).save();
   }

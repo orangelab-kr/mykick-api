@@ -12,6 +12,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Rent } from '../../rent/entities/rent.entity';
 import { Card } from '../card/entities/card.entity';
 import { Session } from '../session/entities/session.entity';
 
@@ -50,6 +51,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Card, (card) => card.user)
   cards: Card[];
+
+  @OneToMany(() => Rent, (rent) => rent.user)
+  rents: Rent[];
 
   @CreateDateColumn()
   @ApiProperty({ example: dayjs() })

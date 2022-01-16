@@ -17,9 +17,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Rent } from '../../rent/entities/rent.entity';
 
 export enum AddonPaymentType {
   MONTHLY = 'monthly',
@@ -59,6 +62,10 @@ export class Addon extends BaseEntity {
   @Min(1, { message: '최소 1일부터 지정 가능합니다.' })
   @Max(3650, { message: '최소 10년을 초과할 수 없습니다.' })
   periodDays: number;
+
+  @JoinTable()
+  @ManyToMany(() => Rent, (rent) => rent.addons)
+  rents: Rent[];
 
   @ApiProperty({ example: dayjs() })
   @CreateDateColumn()

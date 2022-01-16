@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsDate,
   IsInt,
   IsString,
   Max,
@@ -15,9 +16,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Rent } from '../../rent/entities/rent.entity';
 
 @Entity()
 export class Pricing extends BaseEntity {
@@ -47,10 +50,15 @@ export class Pricing extends BaseEntity {
   @Max(120, { message: '최소 120개월 초과할 수 없습니다.' })
   periodMonths: number;
 
+  @OneToMany(() => Rent, (rent) => rent.pricing)
+  rents: Rent[];
+
+  @IsDate()
   @ApiProperty({ example: dayjs() })
   @CreateDateColumn()
   createdAt: Date;
 
+  @IsDate()
   @ApiProperty({ example: dayjs() })
   @UpdateDateColumn()
   updatedAt: Date;
