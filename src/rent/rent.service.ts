@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
@@ -9,6 +9,8 @@ import { Rent } from './entities/rent.entity';
 
 @Injectable()
 export class RentService {
+  private readonly logger = new Logger(RentService.name);
+
   constructor(
     @InjectRepository(Rent)
     private readonly rentRepository: Repository<Rent>,
@@ -24,7 +26,8 @@ export class RentService {
     ]);
 
     const remainingMonths = pricing.periodMonths;
-    await this.rentRepository
+    this.logger.log(`${user.name}(${user.userId}) has been requested new rent`);
+    return this.rentRepository
       .create({ name, user, pricing, addons, remainingMonths })
       .save();
   }

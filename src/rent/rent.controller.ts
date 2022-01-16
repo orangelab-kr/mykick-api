@@ -13,7 +13,8 @@ export class RentController {
 
   @Post()
   create(@UserDecorator() user: User, @Body() body: RequestRentDto) {
-    return this.rentService.request(user, body);
+    const rent = this.rentService.request(user, body);
+    return { rent };
   }
 
   @Get()
