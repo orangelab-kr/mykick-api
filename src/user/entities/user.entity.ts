@@ -12,8 +12,9 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Card } from '../../card/entities/card.entity';
+import { Payment } from '../../payment/entities/payment.entity';
 import { Rent } from '../../rent/entities/rent.entity';
-import { Card } from '../card/entities/card.entity';
 import { Session } from '../session/entities/session.entity';
 
 @Entity()
@@ -51,6 +52,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Card, (card) => card.user)
   cards: Card[];
+
+  @OneToMany(() => Payment, (payment) => payment.user)
+  payments: Payment[];
 
   @OneToMany(() => Rent, (rent) => rent.user)
   rents: Rent[];

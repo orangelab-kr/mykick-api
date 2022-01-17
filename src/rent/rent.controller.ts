@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
 import { UserDecorator } from '../user/user.decorator';
-import { RequestRentDto } from './dto/request-rent.dto';
+import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
 import { RentService } from './rent.service';
 
 @ApiTags('렌트')
@@ -12,8 +12,11 @@ export class RentController {
   constructor(private readonly rentService: RentService) {}
 
   @Post()
-  create(@UserDecorator() user: User, @Body() body: RequestRentDto) {
-    const rent = this.rentService.request(user, body);
+  async request(
+    @UserDecorator() user: User,
+    @Body() body: RequestAndPayRentDto,
+  ) {
+    const rent = await this.rentService.requestAndPay(user, body);
     return { rent };
   }
 

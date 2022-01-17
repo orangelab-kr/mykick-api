@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { RouterModule } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AddonModule } from '../addon/addon.module';
+import { CardModule } from '../card/card.module';
+import { PaymentModule } from '../payment/payment.module';
 import { PricingModule } from '../pricing/pricing.module';
 import { Rent } from './entities/rent.entity';
 import { RentController } from './rent.controller';
@@ -14,6 +16,8 @@ import { RentService } from './rent.service';
   imports: [
     AddonModule,
     PricingModule,
+    PaymentModule,
+    CardModule,
     TypeOrmModule.forFeature([Rent]),
     RouterModule.register([
       {
