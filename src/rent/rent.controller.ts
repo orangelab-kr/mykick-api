@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
 import { UserDecorator } from '../user/user.decorator';
+import { EstimateRentDto } from './dto/estimate-rent.dto';
 import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
 import { RentService } from './rent.service';
 
@@ -18,6 +19,12 @@ export class RentController {
   ) {
     const rent = await this.rentService.requestAndPay(user, body);
     return { rent };
+  }
+
+  @Post('estimate')
+  async getEstimate(@Body() body: EstimateRentDto) {
+    const { items, total } = await this.rentService.getEstimateView(body);
+    return { items, total };
   }
 
   @Get()

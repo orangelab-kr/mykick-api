@@ -5,9 +5,11 @@ import _ from 'lodash';
 import { Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { CardService } from '../card/card.service';
+import { PaymentItem } from '../payment/entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PricingService } from '../pricing/pricing.service';
 import { User } from '../user/entities/user.entity';
+import { EstimateRentDto } from './dto/estimate-rent.dto';
 import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
 import { RequestRentDto } from './dto/request-rent.dto';
 import { Rent } from './entities/rent.entity';
@@ -49,18 +51,31 @@ export class RentService {
     return rent;
   }
 
-  async request(user: User, payload: RequestRentDto) {
-    const { name, pricingId, addonIds } = payload;
+  async getEstimateView(
+    payload: EstimateRentDto,
+  ): Promise<{ items: PaymentItem[]; total: number }> {
+    const rent = await this.getEstimate(payload);
+    const items = this.paymentService.generateItems(rent, true);
+    const total = this.paymentService.calculateAmount(items);
+    return { items, total };
+  }
+
+  async getEstimate(payload: EstimateRentDto): Promise<Rent> {
+    const { pricingId, addonIds } = payload;
     const [pricing, addons] = await Promise.all([
       this.pricingService.findOneOrThrow(pricingId),
       this.addonService.getMany(addonIds),
     ]);
 
     const remainingMonths = pricing.periodMonths;
+    return this.rentRepository.create({ pricing, addons, remainingMonths });
+  }
+
+  async request(user: User, payload: RequestRentDto): Promise<Rent> {
+    const { name } = payload;
+    const rent = await this.getEstimate(_.omit(payload, 'name'));
     this.logger.log(`${user.name}(${user.userId}) has been requested new rent`);
-    return this.rentRepository
-      .create({ name, user, pricing, addons, remainingMonths })
-      .save();
+    return this.rentRepository.merge(rent, { user, name }).save();
   }
 
   async remove(rent: Rent) {

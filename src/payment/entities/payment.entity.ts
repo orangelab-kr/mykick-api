@@ -12,13 +12,19 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Rent } from '../../rent/entities/rent.entity';
 import { Card } from '../../card/entities/card.entity';
+import { Rent } from '../../rent/entities/rent.entity';
 import { User } from '../../user/entities/user.entity';
+
+export enum PaymentType {
+  Monthly = 'Monthly',
+  Onetime = 'Onetime',
+}
 
 export interface PaymentItem {
   name: string;
   amount: number;
+  type: PaymentType;
 }
 
 @Entity()

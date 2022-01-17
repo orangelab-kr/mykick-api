@@ -4,13 +4,12 @@ import _ from 'lodash';
 import shortUUID from 'short-uuid';
 import superagent from 'superagent';
 import { Repository } from 'typeorm';
-import { AddonPaymentType } from '../addon/entities/addon.entity';
 import { CardService } from '../card/card.service';
 import { Opcode } from '../common/opcode';
 import { Rent } from '../rent/entities/rent.entity';
 import { User } from '../user/entities/user.entity';
 import { PurchasePaymentDto } from './dto/purchase-payment.dto';
-import { Payment, PaymentItem } from './entities/payment.entity';
+import { Payment, PaymentItem, PaymentType } from './entities/payment.entity';
 
 @Injectable()
 export class PaymentService {
@@ -56,15 +55,20 @@ export class PaymentService {
   }
 
   generateItems(rent: Rent, includeOnetime = false): PaymentItem[] {
-    const mainItem = { name: '킥보드 렌트', amount: rent.pricing.monthlyPrice };
+    const mainItem = {
+      name: '킥보드 렌트',
+      amount: rent.pricing.monthlyPrice,
+      type: PaymentType.Monthly,
+    };
     const addons = rent.addons.filter(({ paymentType }) => {
       if (includeOnetime) return true;
-      return paymentType !== AddonPaymentType.Onetime;
+      return paymentType !== PaymentType.Onetime;
     });
 
     const addonItems = addons.map((addon) => ({
       name: addon.name,
       amount: addon.price,
+      type: addon.paymentType,
     }));
 
     return [mainItem, ...addonItems];

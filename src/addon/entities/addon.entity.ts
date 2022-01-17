@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsEnum,
   IsInt,
-  IsOptional,
   IsString,
   Max,
   MaxLength,
@@ -17,17 +16,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
   ManyToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { PaymentType } from '../../payment/entities/payment.entity';
 import { Rent } from '../../rent/entities/rent.entity';
-
-export enum AddonPaymentType {
-  Monthly = 'Monthly',
-  Onetime = 'Onetime',
-}
 
 @Entity()
 export class Addon extends BaseEntity {
@@ -50,10 +44,10 @@ export class Addon extends BaseEntity {
   @Max(1000000, { message: '최소 100만원을 초과할 수 없습니다.' })
   price: number;
 
-  @Column({ type: 'enum', enum: AddonPaymentType })
-  @ApiProperty({ description: '결제 방식', example: AddonPaymentType.Onetime })
-  @IsEnum(AddonPaymentType)
-  paymentType: AddonPaymentType;
+  @Column({ type: 'enum', enum: PaymentType })
+  @ApiProperty({ description: '결제 방식', example: PaymentType.Onetime })
+  @IsEnum(PaymentType)
+  paymentType: PaymentType;
 
   @ManyToMany(() => Rent, (rent) => rent.addons)
   rents: Rent[];
