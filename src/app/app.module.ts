@@ -45,9 +45,11 @@ export class AppModule implements NestModule {
         /** Pricings */
         { path: '/:version/pricings', method: RequestMethod.GET },
         { path: '/:version/pricings/:pricingId', method: RequestMethod.GET },
-        /** Addon */
+        /** Addons */
         { path: '/:version/addons', method: RequestMethod.GET },
-        { path: '/:version/addons/:pricingId', method: RequestMethod.GET },
+        { path: '/:version/addons/:addonId', method: RequestMethod.GET },
+        /** Rents */
+        { path: '/:version/rents/estimate', method: RequestMethod.POST },
       )
       .forRoutes('*');
   }

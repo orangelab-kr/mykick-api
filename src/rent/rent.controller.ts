@@ -7,12 +7,12 @@ import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
 import { RentService } from './rent.service';
 
 @ApiTags('렌트')
-@ApiBearerAuth()
 @Controller({ version: '1' })
 export class RentController {
   constructor(private readonly rentService: RentService) {}
 
   @Post()
+  @ApiBearerAuth()
   async request(
     @UserDecorator() user: User,
     @Body() body: RequestAndPayRentDto,
@@ -28,6 +28,7 @@ export class RentController {
   }
 
   @Get()
+  @ApiBearerAuth()
   findAll(@UserDecorator() user: User) {
     return this.rentService.getMany(user);
   }
