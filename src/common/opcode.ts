@@ -22,4 +22,5 @@ export const Opcode = {
   CannotFindCard: $(11, HttpStatus.NOT_FOUND, 'CannotFindCard'),
   CannotGetCheckout: $(12, HttpStatus.BAD_REQUEST, 'CannotGetCheckout'),
   ExistsCardName: $(13, HttpStatus.BAD_REQUEST, 'ExistsCardName'),
+  PaymentFailed: $(14, HttpStatus.PAYMENT_REQUIRED, 'PaymentFailed'),
 };
