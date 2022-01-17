@@ -4,4 +4,4 @@ import { Phone } from '../entities/phone.entity';
 export class VerifyPhoneDto extends PickType(Phone, [
   'phoneNo',
   'verifyCode',
-]) {}
+] as const) {}

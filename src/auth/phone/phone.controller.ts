@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { RequestPhoneDto } from './dto/request-phone-dto';
-import { VerifyPhoneDto } from './dto/verify-phone-dto';
+import { VerifyPhoneDto } from './dto/verify-phone.dto';
 import { PhoneService } from './phone.service';
 
 @ApiTags('인증')
