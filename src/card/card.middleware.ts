@@ -1,6 +1,6 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
-import { Opcode } from '../../common/opcode';
+import { Opcode } from '../common/opcode';
 import { CardService } from './card.service';
 
 @Injectable()

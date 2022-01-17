@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { RouterModule } from '@nestjs/core';
-import { CardModule } from '../user/card/card.module';
+import { CardModule } from '../card/card.module';
 import { SessionModule } from '../user/session/session.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './auth.controller';

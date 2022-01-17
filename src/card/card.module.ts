@@ -1,12 +1,18 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  forwardRef,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PaymentModule } from '../payment/payment.module';
 import { CardController } from './card.controller';
 import { CardMiddleware } from './card.middleware';
 import { CardService } from './card.service';
 import { Card } from './entities/card.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Card])],
+  imports: [TypeOrmModule.forFeature([Card]), forwardRef(() => PaymentModule)],
   exports: [TypeOrmModule.forFeature([Card]), CardService],
   controllers: [CardController],
   providers: [CardService],

@@ -7,6 +7,7 @@ import {
 import { AddonModule } from '../addon/addon.module';
 import { AuthMiddleware } from '../auth/auth.middleware';
 import { AuthModule } from '../auth/auth.module';
+import { CardModule } from '../card/card.module';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
 import { DatabaseModule } from '../database/database.module';
 import { PricingModule } from '../pricing/pricing.module';
@@ -25,6 +26,7 @@ import { AppService } from './app.service';
     AuthModule,
     SessionModule,
     RentModule,
+    CardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

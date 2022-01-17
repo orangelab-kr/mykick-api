@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import _ from 'lodash';
-import { Opcode } from '../../common/opcode';
+import { Opcode } from '../common/opcode';
 
 export const CardDecorator = createParamDecorator(
   (field: string, ctx: ExecutionContext) => {

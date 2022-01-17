@@ -15,10 +15,12 @@ import {
   CreateDateColumn,
   Entity,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../entities/user.entity';
+import { Payment } from '../../payment/entities/payment.entity';
+import { User } from '../../user/entities/user.entity';
 
 export enum CardType {
   TOSS = 'TOSS',
@@ -54,6 +56,9 @@ export class Card extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.cards, { eager: true })
   user: User;
+
+  @OneToMany(() => Payment, (payment) => payment.user)
+  payments: Payment[];
 
   @IsDate()
   @ApiProperty({ description: '카드 등록일자', example: dayjs() })

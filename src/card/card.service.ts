@@ -1,10 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import superagent from 'superagent';
 import { Repository } from 'typeorm';
-import { Opcode } from '../../common/opcode';
-import { User } from '../entities/user.entity';
+import { Opcode } from '../common/opcode';
+import { PaymentService } from '../payment/payment.service';
+import { User } from '../user/entities/user.entity';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { Card, CardType } from './entities/card.entity';
@@ -12,16 +13,12 @@ import { Card, CardType } from './entities/card.entity';
 @Injectable()
 export class CardService {
   private readonly logger = new Logger(CardService.name);
-  private readonly tossProductName = '마이킥 정기구독';
-  private readonly tossEndpoint = _.get(process.env, 'TOSS_ENDPOINT');
-  private readonly tossApiKey = _.get(process.env, 'TOSS_API_KEY');
-  private readonly tossCallbackUrl = _.get(process.env, 'TOSS_CALLBACK_URL');
-  private readonly tossFailureUrl = _.get(process.env, 'TOSS_FAILURE_URL');
-  private readonly tossSuccessUrl = _.get(process.env, 'TOSS_SUCCESS_URL');
 
   constructor(
     @InjectRepository(Card)
     private readonly cardRepository: Repository<Card>,
+    @Inject(forwardRef(() => PaymentService))
+    private readonly paymentService: PaymentService,
   ) {}
 
   async getAll(user: User): Promise<{ cards: Card[]; total: number }> {
@@ -65,6 +62,17 @@ export class CardService {
     return card;
   }
 
+  async getBillingKey(card: Card): Promise<string> {
+    const { billingKey } = await this.cardRepository
+      .createQueryBuilder()
+      .leftJoinAndSelect('Card.user', 'user')
+      .andWhere('Card.cardId = :cardId', card)
+      .addSelect('Card.billingKey')
+      .getOne();
+
+    return billingKey;
+  }
+
   async syncWithToss(user: User): Promise<Card> {
     this.logger.log(
       `TOSS - ${user.name}(${user.userId}) has been requested sync with toss.`,
@@ -78,7 +86,7 @@ export class CardService {
       .leftJoinAndSelect('Card.user', 'user')
       .where('user.userId = :userId', user)
       .andWhere('Card.type = :type', { type })
-      .addSelect('billingKey')
+      .addSelect('Card.billingKey')
       .getOne();
 
     if (card) {
@@ -123,17 +131,17 @@ export class CardService {
 
   async getBillingKeyFromToss(user: User): Promise<string | undefined> {
     const { userId } = user;
-    const apiKey = this.tossApiKey;
+    const apiKey = this.paymentService.tossApiKey;
     const { body } = await superagent
-      .post(`${this.tossEndpoint}/status`)
+      .post(`${this.paymentService.tossEndpoint}/billing-key/status`)
       .send({ userId, apiKey });
     return <string | undefined>body.billingKey;
   }
 
   async revokeTossBillingKey(billingKey: string): Promise<void> {
-    const apiKey = this.tossApiKey;
+    const apiKey = this.paymentService.tossApiKey;
     await superagent
-      .post(`${this.tossEndpoint}/remove`)
+      .post(`${this.paymentService.tossEndpoint}/billing-key/remove`)
       .send({ apiKey, billingKey });
     this.logger.log(`TOSS - ${billingKey} has been revoked.`);
   }
@@ -147,13 +155,14 @@ export class CardService {
 
   async getTossCheckoutUrl(user: User): Promise<string> {
     await this.revokeIfTossBillingKeyExists(user);
-    const { body } = await superagent.post(this.tossEndpoint).send({
+    const endpoint = this.paymentService.tossEndpoint;
+    const { body } = await superagent.post(`${endpoint}/billing-key`).send({
       userId: user.userId,
-      apiKey: this.tossApiKey,
-      productDesc: this.tossProductName,
-      resultCallback: this.tossCallbackUrl,
-      returnSuccessUrl: this.tossSuccessUrl,
-      returnFailureUrl: this.tossFailureUrl,
+      apiKey: this.paymentService.tossApiKey,
+      productDesc: this.paymentService.tossProductName,
+      resultCallback: this.paymentService.tossCallbackUrl,
+      returnSuccessUrl: this.paymentService.tossSuccessUrl,
+      returnFailureUrl: this.paymentService.tossFailureUrl,
     });
 
     if (!body.checkoutUri) throw Opcode.CannotGetCheckout();

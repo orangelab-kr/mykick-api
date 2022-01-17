@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
-import { User } from '../entities/user.entity';
-import { UserDecorator } from '../user.decorator';
+import { User } from '../user/entities/user.entity';
+import { UserDecorator } from '../user/user.decorator';
 import { CardDecorator } from './card.decorator';
 import { CardService } from './card.service';
 import { UpdateCardDto } from './dto/update-card.dto';

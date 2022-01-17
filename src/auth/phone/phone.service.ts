@@ -5,7 +5,7 @@ import superagent from 'superagent';
 import { FindCondition, IsNull, MoreThan, Repository } from 'typeorm';
 import { Opcode } from '../../common/opcode';
 import { RequestPhoneDto } from './dto/request-phone-dto';
-import { VerifyPhoneDto } from './dto/verify-phone-dto';
+import { VerifyPhoneDto } from './dto/verify-phone.dto';
 import { Phone } from './entities/phone.entity';
 
 @Injectable()
