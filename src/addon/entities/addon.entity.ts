@@ -32,7 +32,7 @@ export enum AddonPaymentType {
 @Entity()
 export class Addon extends BaseEntity {
   @PrimaryColumn()
-  @ApiProperty({ example: '7heP5xtMP5fitNP92dP56P' })
+  @ApiProperty({ example: shortUUID.generate() })
   @IsString()
   addonId: string;
 
@@ -51,7 +51,7 @@ export class Addon extends BaseEntity {
   price: number;
 
   @Column({ type: 'enum', enum: AddonPaymentType })
-  @ApiProperty({ description: '결제 방식', example: 'ONETIME' })
+  @ApiProperty({ description: '결제 방식', example: AddonPaymentType.Onetime })
   @IsEnum(AddonPaymentType)
   paymentType: AddonPaymentType;
 

@@ -50,7 +50,7 @@ export class Card extends BaseEntity {
   type: CardType;
 
   @Column({ select: false })
-  @ApiProperty({ description: '빌링키', example: 'qVRwfMYOEnohPR3a9M905f' })
+  @ApiProperty({ description: '빌링키', example: shortUUID.generate() })
   @IsString()
   billingKey: string;
 

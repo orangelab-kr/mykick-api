@@ -15,7 +15,7 @@ import {
 @Entity()
 export class Phone extends BaseEntity {
   @PrimaryColumn()
-  @ApiProperty({ example: 'rdY8HtpNa5zrHwsCBHA5eB' })
+  @ApiProperty({ example: shortUUID.generate() })
   @IsString()
   phoneId: string;
 

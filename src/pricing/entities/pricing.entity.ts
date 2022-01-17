@@ -25,7 +25,7 @@ import { Rent } from '../../rent/entities/rent.entity';
 @Entity()
 export class Pricing extends BaseEntity {
   @PrimaryColumn()
-  @ApiProperty({ example: 'rdY8HtpNa5zrHwsCBHA5eB' })
+  @ApiProperty({ example: shortUUID.generate() })
   @IsString()
   pricingId: string;
 

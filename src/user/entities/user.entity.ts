@@ -20,7 +20,7 @@ import { Session } from '../session/entities/session.entity';
 @Entity()
 export class User extends BaseEntity {
   @PrimaryColumn()
-  @ApiProperty({ example: 'ikMCyxYHj2NLJ19dMqT2rf' })
+  @ApiProperty({ example: shortUUID.generate() })
   @IsString()
   userId: string;
 
