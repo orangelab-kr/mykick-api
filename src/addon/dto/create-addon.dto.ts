@@ -4,5 +4,5 @@ import { Addon } from '../entities/addon.entity';
 export class CreateAddonDto extends PickType(Addon, [
   'name',
   'price',
-  'periodDays',
+  'paymentType',
 ] as const) {}
