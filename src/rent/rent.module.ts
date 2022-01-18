@@ -9,7 +9,7 @@ import { RentController } from './rent.controller';
 import { RentService } from './rent.service';
 
 @Module({
-  exports: [RentService],
+  exports: [RentService, TypeOrmModule.forFeature([Rent])],
   controllers: [RentController],
   providers: [RentService],
   imports: [

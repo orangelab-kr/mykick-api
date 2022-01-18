@@ -1,6 +1,13 @@
 import { PartialType, PickType } from '@nestjs/swagger';
-import { RequestRentDto } from './request-rent.dto';
+import { Rent } from '../entities/rent.entity';
 
 export class UpdateRentDto extends PartialType(
-  PickType(RequestRentDto, ['name'] as const),
+  class extends PickType(Rent, [
+    'name',
+    'status',
+    'remainingMonths',
+    'kickboardCode',
+    'activatedAt',
+    'expiredAt',
+  ] as const) {},
 ) {}

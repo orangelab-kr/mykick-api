@@ -26,7 +26,6 @@ export function generateWhere<T extends BaseEntity>(
   for (const [key, whereType] of Object.entries(target)) {
     if (_.get(globalWhere, key)) continue;
     const obj = _.set({ ...globalWhere }, key, whereType(search));
-    console.log(obj, key);
     newWhere.push(obj);
   }
 
