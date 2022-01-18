@@ -2,8 +2,8 @@ import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { CreatePricingDto } from './dto/create-pricing.dto';
 import { UpdatePricingDto } from './dto/update-pricing.dto';
-import { PricingService } from './pricing.service';
 import { PricingDecorator } from './pricing.decorator';
+import { PricingService } from './pricing.service';
 
 @ApiTags('가격표')
 @Controller({ path: 'pricings', version: '1' })

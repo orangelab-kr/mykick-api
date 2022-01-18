@@ -7,7 +7,7 @@ import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
 import { RentService } from './rent.service';
 
 @ApiTags('렌트')
-@Controller({ version: '1' })
+@Controller({ path: 'rents', version: '1' })
 export class RentController {
   constructor(private readonly rentService: RentService) {}
 

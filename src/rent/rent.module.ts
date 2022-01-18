@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { RouterModule } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AddonModule } from '../addon/addon.module';
 import { CardModule } from '../card/card.module';
@@ -19,12 +18,6 @@ import { RentService } from './rent.service';
     PaymentModule,
     CardModule,
     TypeOrmModule.forFeature([Rent]),
-    RouterModule.register([
-      {
-        path: 'rents',
-        module: RentModule,
-      },
-    ]),
   ],
 })
 export class RentModule {}

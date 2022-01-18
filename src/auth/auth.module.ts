@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { RouterModule } from '@nestjs/core';
 import { CardModule } from '../card/card.module';
 import { SessionModule } from '../user/session/session.module';
 import { UserModule } from '../user/user.module';
@@ -11,31 +10,6 @@ import { PhoneService } from './phone/phone.service';
 @Module({
   controllers: [AuthController],
   providers: [AuthService, PhoneService],
-  imports: [
-    UserModule,
-    PhoneModule,
-    SessionModule,
-    CardModule,
-    RouterModule.register([
-      {
-        path: 'auth',
-        module: AuthModule,
-        children: [
-          {
-            path: 'phone',
-            module: PhoneModule,
-          },
-          {
-            path: 'sessions',
-            module: SessionModule,
-          },
-          {
-            path: 'cards',
-            module: CardModule,
-          },
-        ],
-      },
-    ]),
-  ],
+  imports: [UserModule, PhoneModule, SessionModule, CardModule],
 })
 export class AuthModule {}

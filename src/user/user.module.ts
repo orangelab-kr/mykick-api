@@ -1,5 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { RouterModule } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CardModule } from '../card/card.module';
 import { User } from './entities/user.entity';
@@ -13,27 +12,7 @@ import { UserService } from './user.service';
   exports: [UserService],
   controllers: [UserController],
   providers: [UserService, SessionService],
-  imports: [
-    SessionModule,
-    CardModule,
-    TypeOrmModule.forFeature([User]),
-    RouterModule.register([
-      {
-        path: 'users',
-        module: UserModule,
-        children: [
-          {
-            path: ':userId/sessions',
-            module: SessionModule,
-          },
-          {
-            path: ':userId/cards',
-            module: CardModule,
-          },
-        ],
-      },
-    ]),
-  ],
+  imports: [SessionModule, CardModule, TypeOrmModule.forFeature([User])],
 })
 export class UserModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -1,13 +1,12 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { User } from '../entities/user.entity';
 import { UserDecorator } from '../user.decorator';
 import { GetSessionsDto } from './dto/get-sessions.dto';
 import { Session } from './entities/session.entity';
 import { SessionService } from './session.service';
 
-@ApiTags('사용자', '인증')
-@Controller({ version: '1' })
+@Controller({ path: 'auth/sessions', version: '1' })
 @ApiBearerAuth()
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
