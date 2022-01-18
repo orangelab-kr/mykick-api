@@ -55,7 +55,6 @@ export class Addon extends BaseEntity {
   @IsEnum(AddonPaymentType)
   paymentType: AddonPaymentType;
 
-  @JoinTable()
   @ManyToMany(() => Rent, (rent) => rent.addons)
   rents: Rent[];
 
