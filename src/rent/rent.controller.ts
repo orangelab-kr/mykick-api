@@ -30,6 +30,6 @@ export class RentController {
   @Get()
   @ApiBearerAuth()
   findAll(@UserDecorator() user: User) {
-    return this.rentService.getMany(user);
+    return this.rentService.getManyByUser(user);
   }
 }
