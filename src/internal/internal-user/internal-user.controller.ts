@@ -9,7 +9,7 @@ import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 @ApiTags('관리자 / 사용자')
 @Controller({ path: 'internal/users', version: '1' })
 @ApiBearerAuth()
-export class UserController {
+export class InternalUserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
