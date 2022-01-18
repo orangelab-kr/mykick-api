@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { Opcode } from '../../common/opcode';
-import { User } from '../entities/user.entity';
+import { User } from '../../user/entities/user.entity';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { GetSessionsDto } from './dto/get-sessions.dto';
 import { Session } from './entities/session.entity';

@@ -8,7 +8,7 @@ import { Payment } from '../payment/entities/payment.entity';
 import { Pricing } from '../pricing/entities/pricing.entity';
 import { Rent } from '../rent/entities/rent.entity';
 import { User } from '../user/entities/user.entity';
-import { Session } from '../user/session/entities/session.entity';
+import { Session } from '../auth/session/entities/session.entity';
 
 @Module({
   imports: [

@@ -5,7 +5,7 @@ import { VerifyPhoneDto } from './dto/verify-phone.dto';
 import { PhoneService } from './phone.service';
 
 @ApiTags('인증')
-@Controller({ version: '1' })
+@Controller({ path: 'auth/phone', version: '1' })
 export class PhoneController {
   constructor(private readonly phoneService: PhoneService) {}
 

@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Headers, Patch, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
-import { SessionService } from '../user/session/session.service';
+import { SessionService } from './session/session.service';
 import { UserDecorator } from '../user/user.decorator';
 import { AuthService } from './auth.service';
 import { SigninAuthDto } from './dto/signin-auth.dto';
@@ -20,9 +20,6 @@ export class AuthController {
   async getMe(@UserDecorator() user: User) {
     return { user };
   }
-
-  @Patch()
-  async updateMe(@UserDecorator() user: User, @Body() body: UpdateAuthDto) {}
 
   @Post()
   async signin(@Body() body: SigninAuthDto, @Headers('User-Agent') userAgent) {

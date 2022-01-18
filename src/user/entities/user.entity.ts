@@ -15,7 +15,7 @@ import {
 import { Card } from '../../card/entities/card.entity';
 import { Payment } from '../../payment/entities/payment.entity';
 import { Rent } from '../../rent/entities/rent.entity';
-import { Session } from '../session/entities/session.entity';
+import { Session } from '../../auth/session/entities/session.entity';
 
 @Entity()
 export class User extends BaseEntity {

@@ -13,7 +13,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { User } from '../../entities/user.entity';
+import { User } from '../../../user/entities/user.entity';
 
 @Entity()
 export class Session extends BaseEntity {
