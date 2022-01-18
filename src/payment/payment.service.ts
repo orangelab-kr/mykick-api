@@ -10,11 +10,12 @@ import { Opcode } from '../common/opcode';
 import { Rent } from '../rent/entities/rent.entity';
 import { User } from '../user/entities/user.entity';
 import { PurchasePaymentDto } from './dto/purchase-payment.dto';
-import { UpdatePaymentDto } from './dto/update-payment.dto';
 import { Payment, PaymentItem } from './entities/payment.entity';
 
 @Injectable()
 export class PaymentService {
+  private readonly logger = new Logger(PaymentService.name);
+
   constructor(
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
@@ -34,12 +35,20 @@ export class PaymentService {
     const paymentId = shortUUID.generate();
     const amount = this.calculateAmount(items);
     const billingKey = await this.cardService.getBillingKey(card);
+    this.logger.log(
+      `${user.name}(${user.userId}) has now trying to pay ${amount}won with Toss Pay.`,
+    );
+
     const token = await this.purchaseWithToss({
       name,
       billingKey,
       paymentId,
       amount,
     });
+
+    this.logger.log(
+      `${user.name}(${user.userId}) has successfully paid with ${card.name}(${card.cardId}) card. (paymentId: ${paymentId})`,
+    );
 
     return this.paymentRepository
       .create({ name, paymentId, amount, user, card, rent, items, token })
@@ -65,22 +74,6 @@ export class PaymentService {
     return _.sum(_.map(items, (item) => item.amount));
   }
 
-  findAll() {
-    return `This action returns all payment`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} payment`;
-  }
-
-  update(id: number, updatePaymentDto: UpdatePaymentDto) {
-    return `This action updates a #${id} payment`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} payment`;
-  }
-
   async purchaseWithToss(props: {
     name: string;
     billingKey: string;
@@ -100,6 +93,7 @@ export class PaymentService {
       });
 
     if (body.code === 0) return body.payToken;
+    this.logger.warn(`TOSS - Cannot pay with ${props.billingKey} billing key.`);
     throw Opcode.PaymentFailed({ message: body.msg });
   }
 }

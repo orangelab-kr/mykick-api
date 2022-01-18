@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import _ from 'lodash';
-import { DeepPartial, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { CardService } from '../card/card.service';
 import { PaymentService } from '../payment/payment.service';
@@ -58,17 +58,9 @@ export class RentService {
 
     const remainingMonths = pricing.periodMonths;
     this.logger.log(`${user.name}(${user.userId}) has been requested new rent`);
-    return this.create({
-      name,
-      user,
-      pricing,
-      addons,
-      remainingMonths,
-    });
-  }
-
-  create(payload: DeepPartial<Rent>) {
-    return this.rentRepository.create(payload).save();
+    return this.rentRepository
+      .create({ name, user, pricing, addons, remainingMonths })
+      .save();
   }
 
   async remove(rent: Rent) {
