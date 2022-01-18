@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
-import { UserDecorator } from './user.decorator';
-import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { UserDecorator } from '../../user/user.decorator';
+import { UserService } from '../../user/user.service';
+import { CreateUserDto } from '../../user/dto/create-user.dto';
+import { UpdateUserDto } from '../../user/dto/update-user.dto';
+import { User } from '../../user/entities/user.entity';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('관리자 / 사용자')

@@ -7,12 +7,13 @@ import {
 import { AddonModule } from '../addon/addon.module';
 import { AuthMiddleware } from '../auth/auth.middleware';
 import { AuthModule } from '../auth/auth.module';
+import { SessionModule } from '../auth/session/session.module';
 import { CardModule } from '../card/card.module';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
 import { DatabaseModule } from '../database/database.module';
+import { InternalModule } from '../internal/internal.module';
 import { PricingModule } from '../pricing/pricing.module';
 import { RentModule } from '../rent/rent.module';
-import { SessionModule } from '../auth/session/session.module';
 import { UserModule } from '../user/user.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -27,6 +28,7 @@ import { AppService } from './app.service';
     SessionModule,
     RentModule,
     CardModule,
+    InternalModule,
   ],
   controllers: [AppController],
   providers: [AppService],
