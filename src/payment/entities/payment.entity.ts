@@ -8,7 +8,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToMany,
+  ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -46,13 +46,13 @@ export class Payment extends BaseEntity {
   @IsString()
   name: string;
 
-  @OneToMany(() => User, (user) => user.payments)
+  @ManyToOne(() => User, (user) => user.payments)
   user: User;
 
-  @OneToMany(() => Card, (card) => card.payments)
+  @ManyToOne(() => Card, (card) => card.payments)
   card: Card;
 
-  @OneToMany(() => Rent, (rent) => rent.payments)
+  @ManyToOne(() => Rent, (rent) => rent.payments)
   rent: Rent;
 
   @Column({ type: 'json' })
@@ -61,6 +61,11 @@ export class Payment extends BaseEntity {
   @Column()
   @IsString()
   token: string;
+
+  @IsDate()
+  @ApiProperty({ example: dayjs().add(3, 'days') })
+  @Column()
+  cancelledAt: Date;
 
   @IsDate()
   @ApiProperty({ example: dayjs() })

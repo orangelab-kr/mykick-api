@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import {
   BaseEntity,
+  Equal,
   FindCondition,
   FindConditions,
   FindOperator,
@@ -8,10 +9,14 @@ import {
 } from 'typeorm';
 
 export type WhereTypeFunc = (t: string) => FindOperator<any>;
-export const WhereType: { [key: string]: WhereTypeFunc } = {
-  Normal: (t) => Like(`%${t}%`),
+export const WhereType = {
+  Equals: (t) => Equal(t),
+  NumberEquals: (t) => Equal(parseInt(t)),
+  Contains: (t) => Like(`%${t}%`),
   PhoneNumber: (t) => Like(`%${t.replace(/-/, '')}%`),
   UpperCase: (t) => Like(`%${t.toUpperCase()}%`),
+  LowerCase: (t) => Like(`%${t.toLowerCase()}%`),
+  KickboardCode: (t) => Equal(t.toUpperCase()),
 };
 
 export function generateWhere<T extends BaseEntity>(
@@ -24,8 +29,9 @@ export function generateWhere<T extends BaseEntity>(
   if (!search) return where;
   if (!Array.isArray(where)) globalWhere = where;
   for (const [key, whereType] of Object.entries(target)) {
-    if (_.get(globalWhere, key)) continue;
-    const obj = _.set({ ...globalWhere }, key, whereType(search));
+    const operator = whereType(search);
+    if (!operator.value || _.get(globalWhere, key)) continue;
+    const obj = _.set({ ...globalWhere }, key, operator);
     newWhere.push(obj);
   }
 

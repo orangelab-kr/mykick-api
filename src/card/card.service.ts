@@ -133,7 +133,7 @@ export class CardService {
     const { userId } = user;
     const apiKey = this.paymentService.tossApiKey;
     const { body } = await superagent
-      .post(`${this.paymentService.tossEndpoint}/billing-key/status`)
+      .post(`${this.paymentService.tossEndpoint}/v1/billing-key/status`)
       .send({ userId, apiKey });
     return <string | undefined>body.billingKey;
   }
@@ -141,7 +141,7 @@ export class CardService {
   async revokeTossBillingKey(billingKey: string): Promise<void> {
     const apiKey = this.paymentService.tossApiKey;
     await superagent
-      .post(`${this.paymentService.tossEndpoint}/billing-key/remove`)
+      .post(`${this.paymentService.tossEndpoint}/v1/billing-key/remove`)
       .send({ apiKey, billingKey });
     this.logger.log(`TOSS - ${billingKey} has been revoked.`);
   }
@@ -156,7 +156,7 @@ export class CardService {
   async getTossCheckoutUrl(user: User): Promise<string> {
     await this.revokeIfTossBillingKeyExists(user);
     const endpoint = this.paymentService.tossEndpoint;
-    const { body } = await superagent.post(`${endpoint}/billing-key`).send({
+    const { body } = await superagent.post(`${endpoint}/v1/billing-key`).send({
       userId: user.userId,
       apiKey: this.paymentService.tossApiKey,
       productDesc: this.paymentService.tossProductName,

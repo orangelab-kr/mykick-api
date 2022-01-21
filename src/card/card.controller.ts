@@ -7,7 +7,7 @@ import { CardService } from './card.service';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { Card } from './entities/card.entity';
 
-@ApiTags('카드(결제수단)')
+@ApiTags('카드')
 @Controller({ path: 'cards', version: '1' })
 @ApiBearerAuth()
 export class CardController {

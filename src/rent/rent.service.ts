@@ -7,7 +7,7 @@ import { AddonService } from '../addon/addon.service';
 import { CardService } from '../card/card.service';
 import { Opcode } from '../common/opcode';
 import { generateWhere, WhereType } from '../common/tools/generate-where';
-import { PaymentItem } from '../payment/entities/payment.entity';
+import { Payment, PaymentItem } from '../payment/entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PricingService } from '../pricing/pricing.service';
 import { User } from '../user/entities/user.entity';
@@ -53,6 +53,12 @@ export class RentService {
     }
 
     return rent;
+  }
+
+  async getPayments(rent: Rent, take = 9999): Promise<Payment[]> {
+    const rentIds = [rent.rentId];
+    const { payments } = await this.paymentService.getMany({ rentIds, take });
+    return payments;
   }
 
   async getEstimateView(
@@ -111,11 +117,11 @@ export class RentService {
     };
 
     const searchTarget = {
-      rentId: WhereType.Normal,
-      name: WhereType.Normal,
-      kickboardCode: WhereType.UpperCase,
-      'user.userId': WhereType.Normal,
-      'user.name': WhereType.Normal,
+      rentId: WhereType.Equals,
+      name: WhereType.Contains,
+      kickboardCode: WhereType.KickboardCode,
+      'user.userId': WhereType.Contains,
+      'user.name': WhereType.Contains,
       'user.phoneNo': WhereType.PhoneNumber,
     };
 
@@ -164,7 +170,8 @@ export class RentService {
     rent.status = RentStatus.Cancelled;
     rent.cancelledAt = new Date();
     if (refund) {
-      // TODO: 전체 환불
+      const payments = await this.getPayments(rent);
+      await this.paymentService.refundMany(payments);
       this.logger.debug('전체 환불 완료!');
     }
 
