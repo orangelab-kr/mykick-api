@@ -1,9 +1,11 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
 import { UserDecorator } from '../user/user.decorator';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
 import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
+import { Rent } from './entities/rent.entity';
+import { RentDecorator } from './rent.decorator';
 import { RentService } from './rent.service';
 
 @ApiTags('렌트')
@@ -11,13 +13,16 @@ import { RentService } from './rent.service';
 export class RentController {
   constructor(private readonly rentService: RentService) {}
 
-  @Post()
+  @Get()
   @ApiBearerAuth()
-  async request(
-    @UserDecorator() user: User,
-    @Body() body: RequestAndPayRentDto,
-  ) {
-    const rent = await this.rentService.requestAndPay(user, body);
+  findAll(@UserDecorator() user: User) {
+    return this.rentService.getManyByUser(user);
+  }
+
+  @Get(':rentId')
+  @ApiBearerAuth()
+  @ApiParam({ name: 'rentId', description: '렌트 ID' })
+  async find(@RentDecorator() rent: Rent) {
     return { rent };
   }
 
@@ -27,9 +32,13 @@ export class RentController {
     return { items, total };
   }
 
-  @Get()
+  @Post()
   @ApiBearerAuth()
-  findAll(@UserDecorator() user: User) {
-    return this.rentService.getManyByUser(user);
+  async request(
+    @UserDecorator() user: User,
+    @Body() body: RequestAndPayRentDto,
+  ) {
+    const rent = await this.rentService.requestAndPay(user, body);
+    return { rent };
   }
 }

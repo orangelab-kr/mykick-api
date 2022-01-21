@@ -8,10 +8,10 @@ export class RentMiddleware implements NestMiddleware {
   constructor(private readonly rentService: RentService) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
-    const { user, params } = req;
-    if (!user || !params.rentId) throw Opcode.CannotFindRent();
-    req.rent = await this.rentService.getOrThrow(params.rentId);
-    if (req.rent.user !== user) throw Opcode.CannotFindRent();
+    const user = req.user || req.loggined.user;
+    if (!user || !req.params.rentId) throw Opcode.CannotFindRent();
+    req.rent = await this.rentService.getOrThrow(req.params.rentId);
+    if (req.rent.user.userId !== user.userId) throw Opcode.CannotFindRent();
     next();
   }
 }

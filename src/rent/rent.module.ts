@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AddonModule } from '../addon/addon.module';
 import { CardModule } from '../card/card.module';
@@ -6,6 +6,7 @@ import { PaymentModule } from '../payment/payment.module';
 import { PricingModule } from '../pricing/pricing.module';
 import { Rent } from './entities/rent.entity';
 import { RentController } from './rent.controller';
+import { RentMiddleware } from './rent.middleware';
 import { RentService } from './rent.service';
 
 @Module({
@@ -20,4 +21,8 @@ import { RentService } from './rent.service';
     TypeOrmModule.forFeature([Rent]),
   ],
 })
-export class RentModule {}
+export class RentModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RentMiddleware).forRoutes('/:versionId/rents/:rentId');
+  }
+}
