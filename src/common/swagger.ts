@@ -21,6 +21,7 @@ export const setupSwagger = async (app: INestApplication) => {
     .addTag('부가상품', '부가상품을 관리합니다.')
     .addTag('관리자 / 사용자', '사용자를 관리합니다.')
     .addTag('관리자 / 렌트', '렌트를 관리합니다.')
+    .addTag('관리자 / 가격표', '가격표를 관리합니다.')
     .addBearerAuth({
       description: '인증 토큰',
       name: 'Authorization',
