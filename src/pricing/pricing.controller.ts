@@ -8,6 +8,7 @@ import { PricingService } from './pricing.service';
 export class PricingController {
   constructor(private readonly pricingService: PricingService) {}
 
+  @Get()
   async findAll() {
     const pricings = await this.pricingService.findAll();
     return { pricings };
