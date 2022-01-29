@@ -1,7 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsDate,
   IsInt,
+  IsOptional,
   IsString,
   Max,
   MaxLength,
@@ -42,6 +43,16 @@ export class Pricing extends BaseEntity {
   @Min(500, { message: '최소 500원부터 설정할 수 있습니다.' })
   @Max(1000000, { message: '최소 100만원을 초과할 수 없습니다.' })
   monthlyPrice: number;
+
+  @IsOptional()
+  @IsString()
+  @Column({ nullable: true })
+  @ApiPropertyOptional({
+    description: '간단 설명(텍스트)',
+    example: '가볍게 마이킥을 테스트할때 사용하기 좋은 상품입니다.',
+  })
+  @MaxLength(64, { message: '64자 이내로 작성해주세요.' })
+  description: string;
 
   @Column()
   @ApiProperty({ description: '이용할 계약기간(개월)', example: 6 })
