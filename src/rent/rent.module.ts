@@ -23,6 +23,9 @@ import { RentService } from './rent.service';
 })
 export class RentModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(RentMiddleware).forRoutes('/:versionId/rents/:rentId');
+    consumer
+      .apply(RentMiddleware)
+      .exclude('/:versionId/rents/estimate')
+      .forRoutes('/:versionId/rents/:rentId');
   }
 }
