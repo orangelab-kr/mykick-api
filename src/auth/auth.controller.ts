@@ -40,7 +40,9 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signup(@Body() body: SignupAuthDto) {
-    return this.authService.signup(body);
+  async signup(@Body() body: SignupAuthDto, @Headers('User-Agent') userAgent) {
+    const user = await this.authService.signup(body);
+    const { token } = await this.sessionService.create(user, { userAgent });
+    return { token, user };
   }
 }

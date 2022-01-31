@@ -18,8 +18,12 @@ export class UserService {
   async create(payload: CreateUserDto) {
     const user = await this.getByName(payload.name);
     if (user) throw Opcode.ExistsUserPhoneNo({ user });
-    this.logger.log(`${user.name}(${user.userId}) has successfully created.`);
-    return this.userRepository.create(payload).save();
+    const newUser = await this.userRepository.create(payload).save();
+    this.logger.log(
+      `${newUser.name}(${newUser.userId}) has successfully created.`,
+    );
+
+    return newUser;
   }
 
   async getByName(name: string): Promise<User | null> {
