@@ -44,6 +44,9 @@ export class AppModule implements NestModule {
         /** Auth */
         { path: '/:version/auth/signin', method: RequestMethod.POST },
         { path: '/:version/auth/signup', method: RequestMethod.POST },
+        /** PHONE  */
+        { path: '/:version/auth/phone', method: RequestMethod.GET },
+        { path: '/:version/auth/phone', method: RequestMethod.POST },
         /** Pricings */
         { path: '/:version/pricings', method: RequestMethod.GET },
         { path: '/:version/pricings/:pricingId', method: RequestMethod.GET },
