@@ -1,5 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsOptional,
+  IsString,
+  IsUrl,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 import dayjs from 'dayjs';
 import shortUUID from 'short-uuid';
 import {
@@ -46,6 +53,15 @@ export class User extends BaseEntity {
     example: '서울 강남구 테헤란로78길 14-8 10층 (대치동)',
   })
   address: string;
+
+  @IsUrl()
+  @IsOptional()
+  @Column({ nullable: true, select: false })
+  @ApiPropertyOptional({
+    description: '신분증 이미지',
+    example: 'https://cdn.hikick.kr/images/THIS_IS_MY_IMAGE.jpg?k=asd',
+  })
+  idcard?: string;
 
   @OneToMany(() => Session, (session) => session.user)
   sessions: Session[];
