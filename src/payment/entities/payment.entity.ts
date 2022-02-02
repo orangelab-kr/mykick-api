@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsInt, IsString, Max, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsDate, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import dayjs from 'dayjs';
 import shortUUID from 'short-uuid';
 import {
@@ -63,9 +63,13 @@ export class Payment extends BaseEntity {
   token: string;
 
   @IsDate()
-  @ApiProperty({ example: dayjs().add(3, 'days') })
   @Column()
-  cancelledAt: Date;
+  @IsOptional()
+  @ApiPropertyOptional({
+    example: dayjs(),
+    description: '취소일',
+  })
+  cancelledAt?: Date;
 
   @IsDate()
   @ApiProperty({ example: dayjs() })
