@@ -62,4 +62,11 @@ export const Opcode = {
     '해당 렌트에는 킥보드가 배정되지 않았습니다.',
   ),
   CannotFindRent: $(17, HttpStatus.NOT_FOUND, '렌트를 찾을 수 없습니다.'),
+  CannotActivateRent: $(
+    18,
+    HttpStatus.BAD_REQUEST,
+    '렌트를 활성화할 수 없습니다.',
+  ),
+  InvalidQrcode: $(19, HttpStatus.NOT_FOUND, '잘못된 QR코드입니다.'),
+  MustBeShipped: $(20, HttpStatus.BAD_REQUEST, '배송 후 활성화할 수 있습니다.'),
 };

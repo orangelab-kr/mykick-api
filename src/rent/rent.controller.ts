@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { url } from 'inspector';
 import { User } from '../user/entities/user.entity';
 import { UserDecorator } from '../user/user.decorator';
+import { ActivateRentDto } from './dto/activate-rent.dto';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
 import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
 import { Rent } from './entities/rent.entity';
@@ -23,6 +25,17 @@ export class RentController {
   @ApiBearerAuth()
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
   async find(@RentDecorator() rent: Rent) {
+    return { rent };
+  }
+
+  @Post(':rentId/activate')
+  @ApiBearerAuth()
+  @ApiParam({ name: 'rentId', description: '렌트 ID' })
+  async activate(
+    @RentDecorator() beforeRent: Rent,
+    @Body() body: ActivateRentDto,
+  ) {
+    const rent = await this.rentService.activateByUser(beforeRent, body);
     return { rent };
   }
 

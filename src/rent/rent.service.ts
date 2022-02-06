@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import _ from 'lodash';
+import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { CardService } from '../card/card.service';
@@ -11,6 +12,7 @@ import { Payment, PaymentItem } from '../payment/entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PricingService } from '../pricing/pricing.service';
 import { User } from '../user/entities/user.entity';
+import { ActivateRentDto } from './dto/activate-rent.dto';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
 import { GetRentsDto } from './dto/get-rents.dto';
 import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
@@ -133,6 +135,22 @@ export class RentService {
     find.where = generateWhere<Rent>(where, payload.search, searchTarget);
     const [rents, total] = await this.rentRepository.findAndCount(find);
     return { rents, total };
+  }
+
+  async activateByUser(rent: Rent, payload: ActivateRentDto): Promise<Rent> {
+    if (rent.status !== RentStatus.Shipped) throw Opcode.CannotActivateRent();
+    const kickboardCode = await this.getKickboardCodeByUrl(payload.url);
+    if (rent.kickboardCode !== kickboardCode) throw Opcode.CannotActivateRent();
+    return this.activate(rent);
+  }
+
+  async getKickboardCodeByUrl(url: string): Promise<string> {
+    const { redirects } = await superagent(url);
+    const redirectUrl = redirects[redirects.length - 1];
+    const { searchParams } = new URL(redirectUrl);
+    const kickboardCode = searchParams.get('code');
+    if (!kickboardCode) throw Opcode.InvalidQrcode();
+    return kickboardCode;
   }
 
   async update(rent: Rent, payload: UpdateRentDto): Promise<Rent> {
