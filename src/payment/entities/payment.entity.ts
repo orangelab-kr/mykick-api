@@ -63,8 +63,8 @@ export class Payment extends BaseEntity {
   token: string;
 
   @IsDate()
-  @Column()
   @IsOptional()
+  @Column({ nullable: true })
   @ApiPropertyOptional({
     example: dayjs(),
     description: '취소일',

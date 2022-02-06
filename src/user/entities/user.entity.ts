@@ -63,16 +63,16 @@ export class User extends BaseEntity {
   })
   idcard?: string;
 
-  @OneToMany(() => Session, (session) => session.user)
+  @OneToMany(() => Session, (session) => session.user, { onDelete: 'CASCADE' })
   sessions: Session[];
 
-  @OneToMany(() => Card, (card) => card.user)
+  @OneToMany(() => Card, (card) => card.user, { onDelete: 'CASCADE' })
   cards: Card[];
 
-  @OneToMany(() => Payment, (payment) => payment.user)
+  @OneToMany(() => Payment, (payment) => payment.user, { onDelete: 'CASCADE' })
   payments: Payment[];
 
-  @OneToMany(() => Rent, (rent) => rent.user)
+  @OneToMany(() => Rent, (rent) => rent.user, { onDelete: 'CASCADE' })
   rents: Rent[];
 
   @CreateDateColumn()
