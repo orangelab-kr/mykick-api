@@ -2,10 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import _ from 'lodash';
+import { InternalKickboard, InternalKickboardMode } from 'openapi-internal-sdk';
 import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { CardService } from '../card/card.service';
+import { InternalClient } from '../common/internalClient';
 import { Opcode } from '../common/opcode';
 import { generateWhere, WhereType } from '../common/tools/generate-where';
 import { Payment, PaymentItem } from '../payment/entities/payment.entity';
@@ -57,6 +59,26 @@ export class RentService {
     return rent;
   }
 
+  async control(rent: Rent, enabled: boolean): Promise<Rent> {
+    const kickboard = await this.getKickboardByRent(rent);
+    enabled ? await kickboard.start() : await kickboard.stop();
+    return this.update(rent, { enabled });
+  }
+
+  async alarm(rent: Rent): Promise<Rent> {
+    const kickboard = await this.getKickboardByRent(rent);
+    if (!rent.enabled) await kickboard.start();
+    await kickboard.alarmOn({ seconds: 5000 });
+    if (!rent.enabled) await kickboard.stop();
+    return rent;
+  }
+
+  async light(rent: Rent, lightOn: boolean): Promise<Rent> {
+    const kickboard = await this.getKickboardByRent(rent);
+    lightOn ? await kickboard.lightOn({}) : await kickboard.lightOff();
+    return this.update(rent, { lightOn });
+  }
+
   async getPayments(rent: Rent, take = 9999): Promise<Payment[]> {
     const rentIds = [rent.rentId];
     const { payments } = await this.paymentService.getMany({ rentIds, take });
@@ -88,6 +110,17 @@ export class RentService {
     const rent = await this.getEstimate(_.omit(payload, 'name'));
     this.logger.log(`${user.name}(${user.userId}) has been requested new rent`);
     return this.rentRepository.merge(rent, { user, name }).save();
+  }
+
+  async getKickboardByRent(rent: Rent): Promise<InternalKickboard> {
+    try {
+      const client = InternalClient.getKickboard();
+      const kickboard = await client.getKickboard(rent.kickboardCode);
+      if (kickboard.mode !== InternalKickboardMode.MYKICK) throw Error();
+      return kickboard;
+    } catch (err) {
+      throw Opcode.NoKickboardInRent();
+    }
   }
 
   async remove(rent: Rent) {
@@ -187,6 +220,10 @@ export class RentService {
   async cancel(rent: Rent, refund = false): Promise<Rent> {
     rent.status = RentStatus.Cancelled;
     rent.cancelledAt = new Date();
+
+    const kickboard = await this.getKickboardByRent(rent);
+    await kickboard.update({ mode: InternalKickboardMode.COLLECTED });
+
     if (refund) {
       const payments = await this.getPayments(rent);
       await this.paymentService.refundMany(payments);
@@ -222,6 +259,9 @@ export class RentService {
       if (!rent.kickboardCode) throw Opcode.NoKickboardInRent();
       // TODO: 승인(알림톡)
       this.logger.debug('승인 메세지 전송 완료!');
+
+      const kickboard = await this.getKickboardByRent(rent);
+      await kickboard.update({ mode: InternalKickboardMode.MYKICK });
       return rent;
     }
 
