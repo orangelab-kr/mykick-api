@@ -5,8 +5,10 @@ export class UpdateRentDto extends PartialType(
   class extends PickType(Rent, [
     'name',
     'status',
+    'enabled',
     'remainingMonths',
     'kickboardCode',
+    'lightOn',
     'activatedAt',
     'expiredAt',
   ] as const) {},
