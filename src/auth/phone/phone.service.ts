@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import dayjs from 'dayjs';
 import _ from 'lodash';
 import superagent from 'superagent';
 import { FindCondition, IsNull, MoreThan, Repository } from 'typeorm';
@@ -63,7 +64,8 @@ export class PhoneService {
     phoneNo: string,
     allowThrow = false,
   ): Promise<boolean> {
-    const count = await this.phoneRepository.count({ phoneNo });
+    const createdAt = MoreThan(dayjs().subtract(1, 'days').toDate());
+    const count = await this.phoneRepository.count({ phoneNo, createdAt });
     if (count < this.daliyPhoneLimit) return true;
     this.logger.warn(`${phoneNo} has been blocked! (${this.daliyPhoneLimit})`);
     if (allowThrow) throw Opcode.PhoneDaliyLimit();
