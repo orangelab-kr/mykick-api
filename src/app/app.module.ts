@@ -41,6 +41,8 @@ export class AppModule implements NestModule {
       .apply(AuthMiddleware)
       .exclude(
         { path: '/', method: RequestMethod.GET },
+        /** Internal */
+        { path: '/:version/internal/(.*)', method: RequestMethod.ALL },
         /** Auth */
         { path: '/:version/auth/signin', method: RequestMethod.POST },
         { path: '/:version/auth/signup', method: RequestMethod.POST },
