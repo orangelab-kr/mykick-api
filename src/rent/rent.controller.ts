@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
 import { UserDecorator } from '../user/user.decorator';
 import { ActivateRentDto } from './dto/activate-rent.dto';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
+import { GetRentsDto } from './dto/get-rents.dto';
 import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
 import { Rent } from './entities/rent.entity';
 import { RentDecorator } from './rent.decorator';
@@ -16,8 +17,8 @@ export class RentController {
 
   @Get()
   @ApiBearerAuth()
-  findAll(@UserDecorator() user: User) {
-    return this.rentService.getManyByUser(user);
+  findAll(@UserDecorator() user: User, @Query() query: GetRentsDto) {
+    return this.rentService.getManyByUser(user, query);
   }
 
   @Get(':rentId')
@@ -77,6 +78,14 @@ export class RentController {
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
   async alarm(@RentDecorator() rent: Rent) {
     await this.rentService.alarm(rent);
+  }
+
+  @Get(':rentId/status')
+  @ApiBearerAuth()
+  @ApiParam({ name: 'rentId', description: '렌트 ID' })
+  async status(@RentDecorator() rent: Rent) {
+    const status = await this.rentService.getStatus(rent);
+    return { status };
   }
 
   @Post()

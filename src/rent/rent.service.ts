@@ -2,7 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import _ from 'lodash';
-import { InternalKickboard, InternalKickboardMode } from 'openapi-internal-sdk';
+import {
+  InternalKickboard,
+  InternalKickboardMode,
+  InternalKickboardStatus,
+} from 'openapi-internal-sdk';
 import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
@@ -65,6 +69,10 @@ export class RentService {
     return this.update(rent, { enabled });
   }
 
+  async getStatus(rent: Rent): Promise<InternalKickboardStatus> {
+    return this.getKickboardByRent(rent).then((k) => k.getLatestStatus());
+  }
+
   async alarm(rent: Rent): Promise<Rent> {
     const kickboard = await this.getKickboardByRent(rent);
     if (!rent.enabled) await kickboard.start();
@@ -112,11 +120,15 @@ export class RentService {
     return this.rentRepository.merge(rent, { user, name }).save();
   }
 
-  async getKickboardByRent(rent: Rent): Promise<InternalKickboard> {
+  async getKickboardByRent(
+    rent: Rent,
+    bypassModeValidate = false,
+  ): Promise<InternalKickboard> {
     try {
       const client = InternalClient.getKickboard();
       const kickboard = await client.getKickboard(rent.kickboardCode);
-      if (kickboard.mode !== InternalKickboardMode.MYKICK) throw Error();
+      const validateMode = kickboard.mode !== InternalKickboardMode.MYKICK;
+      if (!bypassModeValidate && validateMode) throw Error();
       return kickboard;
     } catch (err) {
       throw Opcode.NoKickboardInRent();
@@ -127,9 +139,11 @@ export class RentService {
     await rent.remove();
   }
 
-  async getManyByUser(user: User): Promise<{ rents: Rent[]; total: number }> {
-    const [rents, total] = await this.rentRepository.findAndCount({ user });
-    return { rents, total };
+  async getManyByUser(
+    user: User,
+    payload: GetRentsDto,
+  ): Promise<{ rents: Rent[]; total: number }> {
+    return this.getMany({ userIds: [user.userId], ...payload });
   }
 
   async get(rentId: string): Promise<Rent | null> {
@@ -257,11 +271,11 @@ export class RentService {
   async changeStatusFromRequested(rent: Rent): Promise<Rent> {
     if (rent.status === RentStatus.Shipping) {
       if (!rent.kickboardCode) throw Opcode.NoKickboardInRent();
+      const kickboard = await this.getKickboardByRent(rent, true);
+      await kickboard.update({ mode: InternalKickboardMode.MYKICK });
+
       // TODO: 승인(알림톡)
       this.logger.debug('승인 메세지 전송 완료!');
-
-      const kickboard = await this.getKickboardByRent(rent);
-      await kickboard.update({ mode: InternalKickboardMode.MYKICK });
       return rent;
     }
 
