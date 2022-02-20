@@ -37,7 +37,8 @@ export class AddonService {
     return addon;
   }
 
-  async getManyByIds(addonIds: string[]): Promise<Addon[]> {
+  async getManyByIds(addonIds?: string[]): Promise<Addon[]> {
+    if (!addonIds) return [];
     return this.addonRepository.findByIds(addonIds);
   }
 

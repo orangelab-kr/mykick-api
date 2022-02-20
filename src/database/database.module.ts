@@ -13,7 +13,7 @@ import { Session } from '../auth/session/entities/session.entity';
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'mariadb',
       host: _.get(process.env, 'DB_HOST', 'localhost'),
       port: _.parseInt(_.get(process.env, 'DB_HOST', '3306')),
       username: _.get(process.env, 'DB_USERNAME', 'root'),

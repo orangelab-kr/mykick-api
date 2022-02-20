@@ -18,9 +18,9 @@ declare global {
 async function bootstrap(isServerless = false) {
   const app = await NestFactory.create(AppModule);
 
-  app.enableCors();
   app.use(helmet());
   app.use(compression());
+  app.enableCors();
   app.useGlobalInterceptors(new WrapperInterceptor());
   app.enableVersioning({ type: VersioningType.URI });
   app.useGlobalPipes(validationPipe());
