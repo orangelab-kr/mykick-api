@@ -31,6 +31,13 @@ export class PaymentService {
   public readonly tossFailureUrl = _.get(process.env, 'TOSS_FAILURE_URL');
   public readonly tossSuccessUrl = _.get(process.env, 'TOSS_SUCCESS_URL');
 
+  async getLastPaymentByRent(rent: Rent): Promise<Payment | undefined> {
+    return this.paymentRepository.findOne({
+      where: { rent },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
   async purchase(user: User, payload: PurchasePaymentDto) {
     const { name, card, items, rent } = payload;
     const paymentId = shortUUID.generate();

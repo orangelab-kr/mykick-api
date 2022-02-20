@@ -6,7 +6,7 @@ import { Phone } from './entities/phone.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Phone])],
-  exports: [TypeOrmModule.forFeature([Phone])],
+  exports: [PhoneService, TypeOrmModule.forFeature([Phone])],
   controllers: [PhoneController],
   providers: [PhoneService],
 })

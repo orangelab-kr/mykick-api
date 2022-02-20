@@ -9,6 +9,7 @@ export class UpdateRentDto extends PartialType(
     'name',
     'status',
     'enabled',
+    'message',
     'remainingMonths',
     'kickboardCode',
     'lightOn',

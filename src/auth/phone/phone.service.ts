@@ -26,7 +26,7 @@ export class PhoneService {
     await this.checkHasLimitExcess(phoneNo, true);
     const verifyCode = this.generateVerifyCode();
     await this.revokeByPhoneNo(phoneNo);
-    if (!debug) await this.send(phoneNo, verifyCode);
+    if (!debug) await this.send(phoneNo, 'mykick_verify', { verifyCode });
     await this.phoneRepository.create({ phoneNo, verifyCode }).save();
     this.logger.log(`${phoneNo} has been requested (debug: ${debug})`);
   }
@@ -86,9 +86,7 @@ export class PhoneService {
     return phone;
   }
 
-  private async send(phoneNo: string, verifyCode: string): Promise<void> {
-    const name = 'mykick_verify';
-    const fields = { verifyCode };
+  public async send(phoneNo: string, name: string, fields: any): Promise<void> {
     const endpoint = _.get(process.env, 'MG_ENDPOINT');
     if (!endpoint) throw Opcode.InvalidError();
     const accessKeyId = _.get(process.env, 'MG_ACCESS_KEY_ID');
@@ -99,7 +97,7 @@ export class PhoneService {
       .set('X-MESSAGE-GATEWAY-ACCESS-KEY-ID', accessKeyId)
       .set('X-MESSAGE-GATEWAY-SECRET-ACCESS-KEY', secretAccessKey)
       .send({ name, phone, fields });
-    this.logger.log(`Successfully sent a verification text to ${phoneNo}`);
+    this.logger.log(`Successfully sent a text to ${phoneNo} / ${name}`);
   }
 
   private generateVerifyCode(): string {
