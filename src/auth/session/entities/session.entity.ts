@@ -31,7 +31,10 @@ export class Session extends BaseEntity {
   @IsString()
   userAgent: string;
 
-  @ManyToOne(() => User, (user) => user.sessions, { eager: true })
+  @ManyToOne(() => User, (user) => user.sessions, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   user: User;
 
   @Column()

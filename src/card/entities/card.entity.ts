@@ -54,10 +54,13 @@ export class Card extends BaseEntity {
   @IsString()
   billingKey: string;
 
-  @ManyToOne(() => User, (user) => user.cards, { eager: true })
+  @ManyToOne(() => User, (user) => user.cards, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   user: User;
 
-  @OneToMany(() => Payment, (payment) => payment.user)
+  @OneToMany(() => Payment, (payment) => payment.user, { onDelete: 'CASCADE' })
   payments: Payment[];
 
   @IsDate()

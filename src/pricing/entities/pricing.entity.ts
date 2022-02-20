@@ -61,7 +61,7 @@ export class Pricing extends BaseEntity {
   @Max(120, { message: '최소 120개월 초과할 수 없습니다.' })
   periodMonths: number;
 
-  @OneToMany(() => Rent, (rent) => rent.pricing)
+  @OneToMany(() => Rent, (rent) => rent.pricing, { onDelete: 'CASCADE' })
   rents: Rent[];
 
   @IsDate()

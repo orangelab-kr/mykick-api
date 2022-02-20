@@ -46,16 +46,24 @@ export class Payment extends BaseEntity {
   @IsString()
   name: string;
 
-  @ManyToOne(() => User, (user) => user.payments)
+  @ManyToOne(() => User, (user) => user.payments, { onDelete: 'CASCADE' })
   user: User;
 
-  @ManyToOne(() => Card, (card) => card.payments)
+  @ManyToOne(() => Card, (card) => card.payments, {
+    eager: true,
+    onDelete: 'CASCADE',
+  })
   card: Card;
 
-  @ManyToOne(() => Rent, (rent) => rent.payments)
+  @ManyToOne(() => Rent, (rent) => rent.payments, { onDelete: 'CASCADE' })
   rent: Rent;
 
-  @Column({ type: 'json' })
+  @Column({
+    type: 'json',
+    array: false,
+    default: () => "'[]'",
+    nullable: false,
+  })
   items: PaymentItem[];
 
   @Column()
