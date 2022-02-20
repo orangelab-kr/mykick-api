@@ -10,6 +10,7 @@ import {
 import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
+import { PhoneService } from '../auth/phone/phone.service';
 import { CardService } from '../card/card.service';
 import { InternalClient } from '../common/internalClient';
 import { Opcode } from '../common/opcode';
@@ -37,6 +38,7 @@ export class RentService {
     private readonly addonService: AddonService,
     private readonly paymentService: PaymentService,
     private readonly cardService: CardService,
+    private readonly phoneService: PhoneService,
   ) {}
 
   async requestAndPay(
@@ -59,6 +61,12 @@ export class RentService {
 
       throw err;
     }
+
+    await this.phoneService.send(user.phoneNo, 'mykick_requested', {
+      link: 'https://my.hikick.kr',
+      rent,
+      card,
+    });
 
     return rent;
   }
@@ -205,6 +213,13 @@ export class RentService {
     let updatedRent = this.rentRepository.merge(rent, payload);
     if (updatedRent.status !== beforeStatus) {
       updatedRent = await this.changeStatus(updatedRent, beforeStatus);
+      if (
+        updatedRent.status !== RentStatus.Cancelled &&
+        updatedRent.status !== RentStatus.Suspended
+      ) {
+        delete updatedRent.message;
+      }
+
       this.logger.log(
         `${rent.name}(${rent.rentId}) has changed status from ${beforeStatus} to ${updatedRent.status}`,
       );
@@ -220,8 +235,10 @@ export class RentService {
       .add(1, 'month')
       .toDate();
 
-    // TODO: 알림톡(배송 완료)
-    this.logger.debug('배송완료 메세지 전송');
+    const { phoneNo } = rent.user;
+    const payment = await this.paymentService.getLastPaymentByRent(rent);
+    const card = payment.card || { name: '알 수 없음' };
+    await this.phoneService.send(phoneNo, 'mykick_arrived', { rent, card });
     return rent.save();
   }
 
@@ -241,11 +258,21 @@ export class RentService {
     if (refund) {
       const payments = await this.getPayments(rent);
       await this.paymentService.refundMany(payments);
-      this.logger.debug('전체 환불 완료!');
     }
 
-    // TODO: 알림톡(취소)
-    this.logger.debug('취소 메세지 전송');
+    const { phoneNo } = rent.user;
+    const payment = await this.paymentService.getLastPaymentByRent(rent);
+    const card = payment.card || { name: '알 수 없음' };
+    await this.phoneService.send(phoneNo, 'mykick_cancel', { rent, card });
+    return rent.save();
+  }
+
+  async suspended(rent: Rent): Promise<Rent> {
+    rent.status = RentStatus.Suspended;
+    const { phoneNo } = rent.user;
+    const payment = await this.paymentService.getLastPaymentByRent(rent);
+    const card = payment.card || { name: '알 수 없음' };
+    await this.phoneService.send(phoneNo, 'mykick_suspended', { rent, card });
     return rent.save();
   }
 
@@ -274,8 +301,15 @@ export class RentService {
       const kickboard = await this.getKickboardByRent(rent, true);
       await kickboard.update({ mode: InternalKickboardMode.MYKICK });
 
-      // TODO: 승인(알림톡)
-      this.logger.debug('승인 메세지 전송 완료!');
+      const { phoneNo } = rent.user;
+      const payment = await this.paymentService.getLastPaymentByRent(rent);
+      const card = payment.card || { name: '알 수 없음' };
+      await this.phoneService.send(phoneNo, 'mykick_departed', {
+        link: 'https://my.hikick.kr',
+        rent,
+        card,
+      });
+
       return rent;
     }
 
@@ -302,7 +336,7 @@ export class RentService {
   }
 
   async changeStatusFromActivated(rent: Rent): Promise<Rent> {
-    if (rent.status === RentStatus.Suspended) return rent;
+    if (rent.status === RentStatus.Suspended) return this.suspended(rent);
     if (rent.status === RentStatus.Cancelled) return this.cancel(rent);
     throw Opcode.CantChangeRentStatus({
       message: '활성화된 렌트는 정지하거나 취소 처리만 가능합니다.',
