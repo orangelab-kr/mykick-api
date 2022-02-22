@@ -24,6 +24,7 @@ import { User } from '../../user/entities/user.entity';
 
 export enum CardType {
   TOSS = 'TOSS',
+  CARD = 'CARD',
 }
 
 @Entity()

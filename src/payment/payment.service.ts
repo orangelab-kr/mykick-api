@@ -25,6 +25,11 @@ export class PaymentService {
   ) {}
 
   public readonly tossProductName = '마이킥 정기구독';
+  public readonly paymentsEndpoint = _.get(
+    process.env,
+    'HIKICK_CORESERVICE_PAYMENTS_URL',
+  );
+
   public readonly tossEndpoint = _.get(process.env, 'TOSS_ENDPOINT');
   public readonly tossApiKey = _.get(process.env, 'TOSS_API_KEY');
   public readonly tossCallbackUrl = _.get(process.env, 'TOSS_CALLBACK_URL');

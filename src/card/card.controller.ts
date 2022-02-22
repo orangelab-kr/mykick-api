@@ -1,9 +1,10 @@
-import { Body, Controller, Delete, Get, Patch } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
 import { UserDecorator } from '../user/user.decorator';
 import { CardDecorator } from './card.decorator';
 import { CardService } from './card.service';
+import { RegisterCardDto } from './dto/register-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { Card } from './entities/card.entity';
 
@@ -16,6 +17,12 @@ export class CardController {
   @Get()
   findAll(@UserDecorator() user: User) {
     return this.cardService.getAll(user);
+  }
+
+  @Post()
+  async register(@UserDecorator() user: User, @Body() body: RegisterCardDto) {
+    const card = await this.cardService.registerWithCard(user, body);
+    return { card };
   }
 
   @Get('checkout')

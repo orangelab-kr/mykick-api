@@ -70,4 +70,5 @@ export const Opcode = {
     HttpStatus.TOO_MANY_REQUESTS,
     '1일 문자 요청 한도를 초과하였습니다.',
   ),
+  CannotRegisterCard: $(12, HttpStatus.BAD_REQUEST),
 };

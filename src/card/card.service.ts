@@ -7,6 +7,7 @@ import { Opcode } from '../common/opcode';
 import { PaymentService } from '../payment/payment.service';
 import { User } from '../user/entities/user.entity';
 import { CreateCardDto } from './dto/create-card.dto';
+import { RegisterCardDto } from './dto/register-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
 import { Card, CardType } from './entities/card.entity';
 
@@ -73,6 +74,40 @@ export class CardService {
     return billingKey;
   }
 
+  async registerWithCard(user: User, payload: RegisterCardDto): Promise<Card> {
+    this.logger.log(
+      `CARD - ${user.name}(${user.userId}) has trying to register card.`,
+    );
+
+    const type = CardType.CARD;
+    const endpoint = this.paymentService.paymentsEndpoint;
+    const {
+      opcode,
+      message,
+      billingKey,
+      cardName: name,
+    }: {
+      opcode: number;
+      message: string;
+      billingKey: string;
+      cardName: string;
+    } = await superagent
+      .post(`${endpoint}/direct/generate`)
+      .ok(() => true)
+      .send(payload)
+      .then((r) => r.body);
+
+    if (opcode !== 0) {
+      this.logger.log(
+        `CARD - ${user.name}(${user.userId}) has an error occurred while registering the card. (${message})`,
+      );
+
+      throw Opcode.CannotRegisterCard({ message });
+    }
+
+    return this.create(user, { name, type, billingKey });
+  }
+
   async syncWithToss(user: User): Promise<Card> {
     this.logger.log(
       `TOSS - ${user.name}(${user.userId}) has been requested sync with toss.`,
@@ -130,7 +165,7 @@ export class CardService {
   }
 
   async getBillingKeyFromToss(user: User): Promise<string | undefined> {
-    const { userId } = user;
+    const userId = user.phoneNo;
     const apiKey = this.paymentService.tossApiKey;
     const { body } = await superagent
       .post(`${this.paymentService.tossEndpoint}/v1/billing-key/status`)
@@ -157,7 +192,7 @@ export class CardService {
     await this.revokeIfTossBillingKeyExists(user);
     const endpoint = this.paymentService.tossEndpoint;
     const { body } = await superagent.post(`${endpoint}/v1/billing-key`).send({
-      userId: user.userId,
+      userId: user.phoneNo,
       apiKey: this.paymentService.tossApiKey,
       productDesc: this.paymentService.tossProductName,
       resultCallback: this.paymentService.tossCallbackUrl,
