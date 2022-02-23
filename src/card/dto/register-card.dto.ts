@@ -14,7 +14,7 @@ export class RegisterCardDto {
   expiry: string;
 
   @IsString()
-  @Length(2)
+  @Length(2, 2)
   password: string;
 
   @IsString()

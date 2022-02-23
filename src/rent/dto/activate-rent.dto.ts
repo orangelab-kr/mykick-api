@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsUrl } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsString, IsUrl, Length } from 'class-validator';
 
 export class ActivateRentDto {
   @ApiPropertyOptional({
@@ -8,5 +9,16 @@ export class ActivateRentDto {
   })
   @IsString()
   @IsUrl()
-  url: string;
+  @IsOptional()
+  url?: string;
+
+  @ApiPropertyOptional({
+    description: '킥보드 코드',
+    example: 'DE20KP',
+  })
+  @IsString()
+  @Length(6, 6)
+  @IsOptional()
+  @Transform(({ value }) => value.toUpperCase())
+  kickboardCode?: string;
 }

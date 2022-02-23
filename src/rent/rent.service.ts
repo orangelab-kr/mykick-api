@@ -188,8 +188,12 @@ export class RentService {
   }
 
   async activateByUser(rent: Rent, payload: ActivateRentDto): Promise<Rent> {
+    const { url } = payload;
     if (rent.status !== RentStatus.Shipped) throw Opcode.CannotActivateRent();
-    const kickboardCode = await this.getKickboardCodeByUrl(payload.url);
+    if (!url && !payload.kickboardCode) throw Opcode.CannotActivateRent();
+    const kickboardCode =
+      payload.kickboardCode || (await this.getKickboardCodeByUrl(payload.url));
+    console.log(kickboardCode);
     if (rent.kickboardCode !== kickboardCode) throw Opcode.CannotActivateRent();
     return this.activate(rent);
   }
@@ -227,7 +231,7 @@ export class RentService {
     rent.status = RentStatus.Shipped;
     rent.remainingMonths--;
     rent.expiredAt = dayjs(rent.expiredAt || undefined)
-      .add(1, 'month')
+      .add(30, 'days')
       .toDate();
 
     const { phoneNo } = rent.user;
