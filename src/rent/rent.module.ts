@@ -18,7 +18,6 @@ import { RentService } from './rent.service';
     AddonModule,
     PricingModule,
     PaymentModule,
-    CardModule,
     PhoneModule,
     TypeOrmModule.forFeature([Rent]),
   ],

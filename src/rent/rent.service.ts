@@ -11,7 +11,6 @@ import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { PhoneService } from '../auth/phone/phone.service';
-import { CardService } from '../card/card.service';
 import { InternalClient } from '../common/internalClient';
 import { Opcode } from '../common/opcode';
 import { generateWhere, WhereType } from '../common/tools/generate-where';
@@ -22,7 +21,6 @@ import { User } from '../user/entities/user.entity';
 import { ActivateRentDto } from './dto/activate-rent.dto';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
 import { GetRentsDto } from './dto/get-rents.dto';
-import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
 import { RequestRentDto } from './dto/request-rent.dto';
 import { UpdateRentDto } from './dto/update-rent.dto';
 import { Rent, RentStatus } from './entities/rent.entity';
@@ -37,22 +35,18 @@ export class RentService {
     private readonly pricingService: PricingService,
     private readonly addonService: AddonService,
     private readonly paymentService: PaymentService,
-    private readonly cardService: CardService,
     private readonly phoneService: PhoneService,
   ) {}
 
-  async requestAndPay(
-    user: User,
-    payload: RequestAndPayRentDto,
-  ): Promise<Rent> {
-    const card = await this.cardService.getOrThrow(user, payload.cardId);
+  async requestAndPay(user: User, payload: RequestRentDto): Promise<Rent> {
+    let payment: Payment | undefined;
     const rent = await this.request(user, _.omit(payload, 'cardId'));
 
     try {
       const month = dayjs().month() + 1;
       const name = `${month}월달 이용료(첫 이용❤️)`;
       const items = this.paymentService.generateItems(rent, true);
-      await this.paymentService.purchase(user, { name, card, items, rent });
+      payment = await this.paymentService.purchase(user, { name, items, rent });
     } catch (err) {
       await this.remove(rent);
       this.logger.warn(
@@ -62,6 +56,7 @@ export class RentService {
       throw err;
     }
 
+    const { card } = payment;
     await this.phoneService.send(user.phoneNo, 'mykick_requested', {
       link: 'https://my.hikick.kr',
       rent,
@@ -238,7 +233,12 @@ export class RentService {
     const { phoneNo } = rent.user;
     const payment = await this.paymentService.getLastPaymentByRent(rent);
     const card = payment.card || { name: '알 수 없음' };
-    await this.phoneService.send(phoneNo, 'mykick_arrived', { rent, card });
+    await this.phoneService.send(phoneNo, 'mykick_arrived', {
+      link: 'https://my.hikick.kr',
+      rent,
+      card,
+    });
+
     return rent.save();
   }
 

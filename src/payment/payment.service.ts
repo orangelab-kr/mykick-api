@@ -2,6 +2,7 @@ import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import shortUUID from 'short-uuid';
+import { Card, CardType } from 'src/card/entities/card.entity';
 import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { CardService } from '../card/card.service';
@@ -24,7 +25,7 @@ export class PaymentService {
     private readonly cardService: CardService,
   ) {}
 
-  public readonly tossProductName = '마이킥 정기구독';
+  public readonly productName = '마이킥 정기구독';
   public readonly paymentsEndpoint = _.get(
     process.env,
     'HIKICK_CORESERVICE_PAYMENTS_URL',
@@ -43,29 +44,30 @@ export class PaymentService {
     });
   }
 
-  async purchase(user: User, payload: PurchasePaymentDto) {
-    const { name, card, items, rent } = payload;
-    const paymentId = shortUUID.generate();
+  async purchase(user: User, payload: PurchasePaymentDto): Promise<Payment> {
+    const { name, items, rent } = payload;
     const amount = this.calculateAmount(items);
-    const billingKey = await this.cardService.getBillingKey(card);
     this.logger.log(
-      `${user.name}(${user.userId}) has now trying to pay ${amount}won with Toss Pay.`,
+      `${user.name}(${user.userId}) has now trying to pay ${amount}won.`,
     );
 
-    const token = await this.purchaseWithToss({
-      name,
-      billingKey,
-      paymentId,
-      amount,
-    });
+    const { cards } = await this.cardService.getAll(user);
+    for (const card of cards) {
+      try {
+        const props = { card, user, name, amount, items, rent };
+        const payment =
+          card.type === CardType.TOSS
+            ? await this.purchaseWithToss(props)
+            : card.type === CardType.CARD
+            ? await this.purchaseWithCard(props)
+            : null;
 
-    this.logger.log(
-      `${user.name}(${user.userId}) has successfully paid with ${card.name}(${card.cardId}) card. (paymentId: ${paymentId})`,
-    );
+        if (!payment) continue;
+        return payment;
+      } catch (err) {}
+    }
 
-    return this.paymentRepository
-      .create({ name, paymentId, amount, user, card, rent, items, token })
-      .save();
+    throw Opcode.PaymentFailed();
   }
 
   async getMany(
@@ -151,26 +153,99 @@ export class PaymentService {
     return _.sum(_.map(items, (item) => item.amount));
   }
 
-  async purchaseWithToss(props: {
+  async purchaseWithCard(props: {
+    user: User;
+    card: Card;
+    rent: Rent;
+    items: PaymentItem[];
     name: string;
-    billingKey: string;
     amount: number;
-    paymentId: string;
-  }): Promise<string> {
+  }): Promise<Payment> {
+    const { productName } = this;
+    const { user, card, rent, items, name, amount } = props;
+    const endpoint = this.paymentsEndpoint;
+    const billingKey = await this.cardService.getBillingKey(card);
+    const paymentId = shortUUID.generate();
+    const realname = user.name;
+    const phone = user.phoneNo;
+    const { body } = await superagent
+      .post(`${endpoint}/direct/invoke`)
+      .send({ billingKey, productName, amount, realname, phone });
+
+    if (body.opcode === 0) {
+      this.logger.log(
+        `CARD - ${user.name}(${user.userId}) has successfully paid with ${card.name}(${card.cardId}) card. (paymentId: ${paymentId})`,
+      );
+
+      const token = body.tid;
+      return this.paymentRepository
+        .create({
+          name,
+          paymentId,
+          amount,
+          user,
+          card,
+          rent,
+          items,
+          token,
+        })
+        .save();
+    }
+
+    this.logger.warn(
+      `CARD - Cannot pay with ${billingKey} billing key. (${body.msg})`,
+    );
+
+    throw Opcode.PaymentFailed({ message: body.msg });
+  }
+  async purchaseWithToss(props: {
+    user: User;
+    card: Card;
+    rent: Rent;
+    items: PaymentItem[];
+    name: string;
+    amount: number;
+  }): Promise<Payment> {
+    const { user, card, rent, items, name, amount } = props;
     const endpoint = this.tossEndpoint;
+    const apiKey = this.tossApiKey;
+    const billingKey = await this.cardService.getBillingKey(card);
+    const paymentId = shortUUID.generate();
     const { body } = await superagent
       .post(`${endpoint}/v1/billing-key/bill`)
       .send({
-        apiKey: this.tossApiKey,
-        billingKey: props.billingKey,
-        orderNo: props.paymentId,
-        productDesc: props.name.substring(0, 255),
-        amount: props.amount,
+        apiKey,
+        billingKey,
+        amount,
+        orderNo: paymentId,
+        productDesc: name.substring(0, 255),
         amountTaxFree: 0,
       });
 
-    if (body.code === 0) return body.payToken;
-    this.logger.warn(`TOSS - Cannot pay with ${props.billingKey} billing key.`);
+    if (body.code === 0) {
+      this.logger.log(
+        `TOSS - ${user.name}(${user.userId}) has successfully paid with ${card.name}(${card.cardId}) card. (paymentId: ${paymentId})`,
+      );
+
+      const token = body.payToken;
+      return this.paymentRepository
+        .create({
+          name,
+          paymentId,
+          amount,
+          user,
+          card,
+          rent,
+          items,
+          token,
+        })
+        .save();
+    }
+
+    this.logger.warn(
+      `TOSS - Cannot pay with ${billingKey} billing key. (${body.msg})`,
+    );
+
     throw Opcode.PaymentFailed({ message: body.msg });
   }
 

@@ -5,7 +5,7 @@ import { UserDecorator } from '../user/user.decorator';
 import { ActivateRentDto } from './dto/activate-rent.dto';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
 import { GetRentsDto } from './dto/get-rents.dto';
-import { RequestAndPayRentDto } from './dto/request-and-pay-rent.dto';
+import { RequestRentDto } from './dto/request-rent.dto';
 import { Rent } from './entities/rent.entity';
 import { RentDecorator } from './rent.decorator';
 import { RentService } from './rent.service';
@@ -90,10 +90,7 @@ export class RentController {
 
   @Post()
   @ApiBearerAuth()
-  async request(
-    @UserDecorator() user: User,
-    @Body() body: RequestAndPayRentDto,
-  ) {
+  async request(@UserDecorator() user: User, @Body() body: RequestRentDto) {
     const rent = await this.rentService.requestAndPay(user, body);
     return { rent };
   }

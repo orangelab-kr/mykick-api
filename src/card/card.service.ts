@@ -194,7 +194,7 @@ export class CardService {
     const { body } = await superagent.post(`${endpoint}/v1/billing-key`).send({
       userId: user.phoneNo,
       apiKey: this.paymentService.tossApiKey,
-      productDesc: this.paymentService.tossProductName,
+      productDesc: this.paymentService.productName,
       resultCallback: this.paymentService.tossCallbackUrl,
       returnSuccessUrl: this.paymentService.tossSuccessUrl,
       returnFailureUrl: this.paymentService.tossFailureUrl,
