@@ -193,7 +193,6 @@ export class RentService {
     if (!url && !payload.kickboardCode) throw Opcode.CannotActivateRent();
     const kickboardCode =
       payload.kickboardCode || (await this.getKickboardCodeByUrl(payload.url));
-    console.log(kickboardCode);
     if (rent.kickboardCode !== kickboardCode) throw Opcode.CannotActivateRent();
     return this.activate(rent);
   }
@@ -256,12 +255,15 @@ export class RentService {
     rent.status = RentStatus.Cancelled;
     rent.cancelledAt = new Date();
 
-    const kickboard = await this.getKickboardByRent(rent);
-    await kickboard.update({ mode: InternalKickboardMode.COLLECTED });
+    if (rent.kickboardCode) {
+      const kickboard = await this.getKickboardByRent(rent);
+      await kickboard.update({ mode: InternalKickboardMode.COLLECTED });
+    }
 
     if (refund) {
+      const reason = rent.message;
       const payments = await this.getPayments(rent);
-      await this.paymentService.refundMany(payments);
+      await this.paymentService.refundMany(payments, { reason });
     }
 
     const { phoneNo } = rent.user;
@@ -317,7 +319,7 @@ export class RentService {
       return rent;
     }
 
-    if (rent.status === RentStatus.Cancelled) this.cancel(rent, true);
+    if (rent.status === RentStatus.Cancelled) return this.cancel(rent, true);
     throw Opcode.CantChangeRentStatus({
       message: '신청한 렌트는 배송 처리나 취소 처리만 가능합니다.',
     });

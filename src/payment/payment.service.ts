@@ -2,10 +2,10 @@ import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import _ from 'lodash';
 import shortUUID from 'short-uuid';
-import { Card, CardType } from 'src/card/entities/card.entity';
 import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { CardService } from '../card/card.service';
+import { Card, CardType } from '../card/entities/card.entity';
 import { Opcode } from '../common/opcode';
 import { generateWhere, WhereType } from '../common/tools/generate-where';
 import { Rent } from '../rent/entities/rent.entity';
@@ -96,7 +96,7 @@ export class PaymentService {
     if (payload.take) find.take = payload.take;
     if (payload.skip) find.skip = payload.skip;
     if (payload.userIds) where.user = { userId: In(payload.userIds) };
-    if (payload.rentIds) where.rent = { rentId: In(payload.userIds) };
+    if (payload.rentIds) where.rent = { rentId: In(payload.rentIds) };
     find.where = generateWhere<Rent>(where, payload.search, searchTarget);
     const [payments, total] = await this.paymentRepository.findAndCount(find);
     return { payments, total };
@@ -104,11 +104,12 @@ export class PaymentService {
 
   async refundMany(
     payments: Payment[],
+    props: { reason?: string },
   ): Promise<{ success: Payment[]; failed: Payment[] }> {
     const [success, failed] = [[], []];
     for (const payment of payments) {
       try {
-        const updatedPayment = await this.refund(payment);
+        const updatedPayment = await this.refund(payment, props);
         success.push(updatedPayment);
       } catch (err) {
         failed.push(payment);
@@ -118,13 +119,13 @@ export class PaymentService {
     return { success, failed };
   }
 
-  async refund(payment: Payment): Promise<Payment> {
-    const { token, amount } = payment;
-    await this.cancelWithToss({ token, amount });
-    this.logger.log(
-      `TOSS - ${payment.name}(${payment.paymentId}) has been refunded.`,
-    );
-
+  async refund(payment: Payment, props: { reason?: string }): Promise<Payment> {
+    const { reason } = props;
+    const { token, amount, card } = payment;
+    const payload = { token, amount, reason };
+    if (card.type === CardType.TOSS) await this.cancelWithToss(payload);
+    if (card.type === CardType.CARD) await this.cancelWithCard(payload);
+    this.logger.log(`${payment.name}(${payment.paymentId}) has been refunded.`);
     payment.cancelledAt = new Date();
     return payment.save();
   }
@@ -249,6 +250,21 @@ export class PaymentService {
     throw Opcode.PaymentFailed({ message: body.msg });
   }
 
+  async cancelWithCard(props: {
+    token: string;
+    amount: number;
+    reason?: string;
+  }): Promise<void> {
+    const { token: tid, amount, reason } = props;
+    const endpoint = this.paymentsEndpoint;
+    const { body } = await superagent
+      .post(`${endpoint}/direct/cancel`)
+      .send({ tid, amount, reason });
+    if (body.opcode === 0) return;
+    this.logger.warn(`CARD - Cannot refund with ${props.token} pay token.`);
+    throw Opcode.PaymentFailed({ message: body.msg });
+  }
+
   async cancelWithToss(props: {
     token: string;
     amount: number;
@@ -262,7 +278,6 @@ export class PaymentService {
       reason: props.reason,
     });
 
-    if (body.code === 0) return;
     this.logger.warn(`TOSS - Cannot refund with ${props.token} pay token.`);
     throw Opcode.PaymentFailed({ message: body.msg });
   }
