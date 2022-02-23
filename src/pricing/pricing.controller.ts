@@ -17,6 +17,6 @@ export class PricingController {
   @Get(':pricingId')
   @ApiParam({ name: 'pricingId', description: '가격표 ID' })
   async findOne(@PricingDecorator() pricing) {
-    return pricing;
+    return { pricing };
   }
 }
