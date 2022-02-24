@@ -1,11 +1,12 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { PricingModule } from '../pricing/pricing.module';
 import { RentModule } from '../rent/rent.module';
 import { UserModule } from '../user/user.module';
+import { InternalPricingController } from './internal-pricing/internal-pricing.controller';
 import { InternalRentController } from './internal-rent/internal-rent.controller';
 import { InternalRentMiddleware } from './internal-rent/internal-rent.middleware';
+import { InternalUserMiddleware } from './internal-user/internal-rent.middleware';
 import { InternalUserController } from './internal-user/internal-user.controller';
-import { InternalPricingController } from './internal-pricing/internal-pricing.controller';
-import { PricingModule } from '../pricing/pricing.module';
 import { InternalMiddleware } from './internal.middleware';
 
 @Module({
@@ -22,6 +23,8 @@ export class InternalModule implements NestModule {
       .apply(InternalMiddleware)
       .forRoutes('/:versionId/internal/*')
       .apply(InternalRentMiddleware)
-      .forRoutes('/:versionId/internal/rents/:rentId');
+      .forRoutes('/:versionId/internal/rents/:rentId')
+      .apply(InternalUserMiddleware)
+      .forRoutes('/:versionId/internal/users/:userId');
   }
 }

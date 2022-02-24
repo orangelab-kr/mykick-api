@@ -26,6 +26,13 @@ export class UserService {
     return newUser;
   }
 
+  async getIdcard(user: User): Promise<string> {
+    const { userId } = user;
+    return this.userRepository
+      .findOne({ where: { userId }, select: ['idcard'] })
+      .then((u) => u.idcard);
+  }
+
   async getByName(name: string): Promise<User | null> {
     return this.userRepository.findOne({ name });
   }

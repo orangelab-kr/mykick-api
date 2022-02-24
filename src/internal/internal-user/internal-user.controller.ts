@@ -30,6 +30,13 @@ export class InternalUserController {
     return { user };
   }
 
+  @Get(':userId/idcard')
+  @ApiParam({ name: 'userId', description: '사용자 ID' })
+  async getIdcard(@UserDecorator() user: User) {
+    const idcard = await this.userService.getIdcard(user);
+    return { idcard };
+  }
+
   @Patch(':userId')
   @ApiParam({ name: 'userId', description: '사용자 ID' })
   async update(@UserDecorator() beforeUser: User, @Body() body: UpdateUserDto) {
