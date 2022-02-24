@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsDate,
   IsOptional,
   IsString,
   IsUrl,
@@ -43,6 +44,14 @@ export class User extends BaseEntity {
   @IsString({ message: '반드시 문자열이여야 합니다.' })
   @Matches(/(010)-\d{3,4}-\d{4}/, { message: '올바른 전화번호가 아닙니다.' })
   phoneNo: string;
+
+  @Column()
+  @IsDate({ message: '올바른 생년월일을 입력해주세요.' })
+  @ApiProperty({
+    description: '생년월일',
+    example: '2004-11-19',
+  })
+  birthday: Date;
 
   @Column()
   @IsString({ message: '반드시 주소여야 합니다.' })

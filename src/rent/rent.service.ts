@@ -267,18 +267,14 @@ export class RentService {
     }
 
     const { phoneNo } = rent.user;
-    const payment = await this.paymentService.getLastPaymentByRent(rent);
-    const card = payment.card || { name: '알 수 없음' };
-    await this.phoneService.send(phoneNo, 'mykick_cancel', { rent, card });
+    await this.phoneService.send(phoneNo, 'mykick_cancel', { rent });
     return rent.save();
   }
 
   async suspended(rent: Rent): Promise<Rent> {
     rent.status = RentStatus.Suspended;
     const { phoneNo } = rent.user;
-    const payment = await this.paymentService.getLastPaymentByRent(rent);
-    const card = payment.card || { name: '알 수 없음' };
-    await this.phoneService.send(phoneNo, 'mykick_suspended', { rent, card });
+    await this.phoneService.send(phoneNo, 'mykick_suspended', { rent });
     return rent.save();
   }
 
