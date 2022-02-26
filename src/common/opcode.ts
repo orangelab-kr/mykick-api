@@ -70,5 +70,10 @@ export const Opcode = {
     HttpStatus.TOO_MANY_REQUESTS,
     '1일 문자 요청 한도를 초과하였습니다.',
   ),
-  CannotRegisterCard: $(12, HttpStatus.BAD_REQUEST),
+  CannotRegisterCard: $(23, HttpStatus.BAD_REQUEST),
+  RentHasSuspended: $(
+    24,
+    HttpStatus.FORBIDDEN,
+    '마이킥은 현재 일시정지 상태입니다.',
+  ),
 };

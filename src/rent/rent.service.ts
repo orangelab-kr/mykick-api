@@ -67,16 +67,22 @@ export class RentService {
   }
 
   async control(rent: Rent, enabled: boolean): Promise<Rent> {
+    if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
     const kickboard = await this.getKickboardByRent(rent);
     enabled ? await kickboard.start() : await kickboard.stop();
     return this.update(rent, { enabled });
   }
 
-  async getStatus(rent: Rent): Promise<InternalKickboardStatus> {
-    return this.getKickboardByRent(rent).then((k) => k.getLatestStatus());
+  async getStatus(
+    rent: Rent,
+  ): Promise<Pick<InternalKickboardStatus, 'gps' | 'createdAt' | 'power'>> {
+    return this.getKickboardByRent(rent)
+      .then((k) => k.getLatestStatus())
+      .then((status) => _.pick(status, 'gps', 'createdAt', 'power'));
   }
 
   async alarm(rent: Rent): Promise<Rent> {
+    if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
     const kickboard = await this.getKickboardByRent(rent);
     if (!rent.enabled) await kickboard.start();
     await kickboard.alarmOn({ seconds: 5000 });
@@ -85,6 +91,7 @@ export class RentService {
   }
 
   async light(rent: Rent, lightOn: boolean): Promise<Rent> {
+    if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
     const kickboard = await this.getKickboardByRent(rent);
     lightOn ? await kickboard.lightOn({}) : await kickboard.lightOff();
     return this.update(rent, { lightOn });

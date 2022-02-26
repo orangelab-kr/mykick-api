@@ -62,7 +62,7 @@ export class UserService {
   }
 
   async update(user: User, payload: UpdateUserDto): Promise<User> {
-    this.logger.log(`${user.name}(${user.name}) has been updated.`);
+    this.logger.log(`${user.name}(${user.userId}) has been updated.`);
     return this.userRepository.merge(user, payload).save();
   }
 
