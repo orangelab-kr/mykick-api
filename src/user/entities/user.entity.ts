@@ -20,10 +20,11 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { Session } from '../../auth/session/entities/session.entity';
+import { Token } from '../../auth/token/entities/token.entity';
 import { Card } from '../../card/entities/card.entity';
 import { Payment } from '../../payment/entities/payment.entity';
 import { Rent } from '../../rent/entities/rent.entity';
-import { Session } from '../../auth/session/entities/session.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -71,6 +72,9 @@ export class User extends BaseEntity {
     example: 'https://cdn.hikick.kr/images/THIS_IS_MY_IMAGE.jpg?k=asd',
   })
   idcard?: string;
+
+  @OneToMany(() => Token, (session) => session.user, { onDelete: 'CASCADE' })
+  tokens: Token[];
 
   @OneToMany(() => Session, (session) => session.user, { onDelete: 'CASCADE' })
   sessions: Session[];

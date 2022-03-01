@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Headers, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { User } from '../user/entities/user.entity';
 import { UserDecorator } from '../user/user.decorator';
@@ -7,6 +15,7 @@ import { SigninAuthDto } from './dto/signin-auth.dto';
 import { SignupAuthDto } from './dto/signup-auth.dto';
 import { UpdateAuthDto } from './dto/update-auth.dto';
 import { SessionService } from './session/session.service';
+import { TokenService } from './token/token.service';
 
 @ApiTags('인증')
 @Controller({ path: 'auth', version: '1' })
@@ -14,6 +23,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly sessionService: SessionService,
+    private readonly tokenService: TokenService,
   ) {}
 
   @Get()
@@ -30,6 +40,17 @@ export class AuthController {
   ) {
     const user = await this.authService.update(beforeUser, body);
     return { user };
+  }
+
+  @Get('token')
+  async loginWithToken(
+    @Query('code') code: string,
+    @Headers('User-Agent') userAgent,
+  ) {
+    const user = await this.tokenService.getUserByCode(code);
+    const { token } = await this.sessionService.create(user, { userAgent });
+    await this.tokenService.revokeByUser(user);
+    return { user, token };
   }
 
   @Post('signin')

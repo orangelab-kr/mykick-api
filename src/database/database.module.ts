@@ -3,12 +3,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import _ from 'lodash';
 import { Addon } from '../addon/entities/addon.entity';
 import { Phone } from '../auth/phone/entities/phone.entity';
+import { Session } from '../auth/session/entities/session.entity';
+import { Token } from '../auth/token/entities/token.entity';
 import { Card } from '../card/entities/card.entity';
 import { Payment } from '../payment/entities/payment.entity';
 import { Pricing } from '../pricing/entities/pricing.entity';
 import { Rent } from '../rent/entities/rent.entity';
 import { User } from '../user/entities/user.entity';
-import { Session } from '../auth/session/entities/session.entity';
 
 @Module({
   imports: [
@@ -19,7 +20,17 @@ import { Session } from '../auth/session/entities/session.entity';
       username: _.get(process.env, 'DB_USERNAME', 'root'),
       password: _.get(process.env, 'DB_PASSWORD'),
       database: _.get(process.env, 'DB_DATABASE', 'mykick'),
-      entities: [Pricing, Addon, User, Phone, Session, Card, Rent, Payment],
+      entities: [
+        Addon,
+        Phone,
+        Session,
+        Token,
+        Card,
+        Payment,
+        Pricing,
+        Rent,
+        User,
+      ],
       keepConnectionAlive: true,
       synchronize: false,
     }),

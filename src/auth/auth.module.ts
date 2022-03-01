@@ -6,10 +6,18 @@ import { AuthService } from './auth.service';
 import { PhoneModule } from './phone/phone.module';
 import { PhoneService } from './phone/phone.service';
 import { SessionModule } from './session/session.module';
+import { TokenModule } from './token/token.module';
 
 @Module({
   controllers: [AuthController],
   providers: [AuthService, PhoneService],
-  imports: [UserModule, PhoneModule, SessionModule, CardModule, SessionModule],
+  imports: [
+    UserModule,
+    PhoneModule,
+    SessionModule,
+    CardModule,
+    SessionModule,
+    TokenModule,
+  ],
 })
 export class AuthModule {}
