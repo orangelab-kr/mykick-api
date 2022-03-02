@@ -2,7 +2,7 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AddonModule } from '../addon/addon.module';
 import { PhoneModule } from '../auth/phone/phone.module';
-import { CardModule } from '../card/card.module';
+import { TokenModule } from '../auth/token/token.module';
 import { PaymentModule } from '../payment/payment.module';
 import { PricingModule } from '../pricing/pricing.module';
 import { Rent } from './entities/rent.entity';
@@ -19,6 +19,7 @@ import { RentService } from './rent.service';
     PricingModule,
     PaymentModule,
     PhoneModule,
+    TokenModule,
     TypeOrmModule.forFeature([Rent]),
   ],
 })

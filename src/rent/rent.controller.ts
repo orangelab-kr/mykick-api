@@ -48,36 +48,41 @@ export class RentController {
   @Get(':rentId/start')
   @ApiBearerAuth()
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
-  async start(@RentDecorator() rent: Rent) {
-    return this.rentService.control(rent, true);
+  async start(@RentDecorator() beforeRent: Rent) {
+    const rent = await this.rentService.control(beforeRent, true);
+    return { rent };
   }
 
   @Get(':rentId/stop')
   @ApiBearerAuth()
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
-  async stop(@RentDecorator() rent: Rent) {
-    return this.rentService.control(rent, false);
+  async stop(@RentDecorator() beforeRent: Rent) {
+    const rent = await this.rentService.control(beforeRent, false);
+    return { rent };
   }
 
   @Get(':rentId/light/on')
   @ApiBearerAuth()
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
-  async lightOn(@RentDecorator() rent: Rent) {
-    return this.rentService.light(rent, true);
+  async lightOn(@RentDecorator() beforeRent: Rent) {
+    const rent = await this.rentService.light(beforeRent, true);
+    return { rent };
   }
 
   @Get(':rentId/light/off')
   @ApiBearerAuth()
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
-  async lightOff(@RentDecorator() rent: Rent) {
-    return this.rentService.light(rent, false);
+  async lightOff(@RentDecorator() beforeRent: Rent) {
+    const rent = await this.rentService.light(beforeRent, false);
+    return { rent };
   }
 
   @Get(':rentId/alarm')
   @ApiBearerAuth()
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
-  async alarm(@RentDecorator() rent: Rent) {
-    await this.rentService.alarm(rent);
+  async alarm(@RentDecorator() beforeRent: Rent) {
+    const rent = await this.rentService.alarm(beforeRent);
+    return { rent };
   }
 
   @Get(':rentId/status')

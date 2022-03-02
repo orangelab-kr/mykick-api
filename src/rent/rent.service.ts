@@ -11,6 +11,7 @@ import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { PhoneService } from '../auth/phone/phone.service';
+import { TokenService } from '../auth/token/token.service';
 import { InternalClient } from '../common/internalClient';
 import { Opcode } from '../common/opcode';
 import { generateWhere, WhereType } from '../common/tools/generate-where';
@@ -36,8 +37,10 @@ export class RentService {
     private readonly addonService: AddonService,
     private readonly paymentService: PaymentService,
     private readonly phoneService: PhoneService,
+    private readonly tokenService: TokenService,
   ) {}
 
+  public readonly platformId = _.get(process.env, 'HIKICK_PLATFORM_ID');
   async requestAndPay(user: User, payload: RequestRentDto): Promise<Rent> {
     let payment: Payment | undefined;
     const rent = await this.request(user, _.omit(payload, 'cardId'));
@@ -57,8 +60,10 @@ export class RentService {
     }
 
     const { card } = payment;
+    const { code } = await this.tokenService.createToken(user);
+    const link = `https://my.hikick.kr/?code=${code}&url=/rents/${rent.rentId}`;
     await this.phoneService.send(user.phoneNo, 'mykick_requested', {
-      link: 'https://my.hikick.kr',
+      link,
       rent,
       card,
     });
@@ -69,7 +74,18 @@ export class RentService {
   async control(rent: Rent, enabled: boolean): Promise<Rent> {
     if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
     const kickboard = await this.getKickboardByRent(rent);
-    enabled ? await kickboard.start() : await kickboard.stop();
+    if (enabled) {
+      // await kickboard.start();
+      this.logger.log(`${rent.name}(${rent.rentId}) has started ride.`);
+      if (this.isHaveInsurance(rent)) {
+        await this.startInsurance(rent, kickboard);
+      }
+    } else {
+      // await kickboard.stop();
+      await this.stopInsurance(rent);
+      this.logger.log(`${rent.name}(${rent.rentId}) has terminated ride.`);
+    }
+
     return this.update(rent, { enabled });
   }
 
@@ -88,6 +104,55 @@ export class RentService {
     await kickboard.alarmOn({ seconds: 5000 });
     if (!rent.enabled) await kickboard.stop();
     return rent;
+  }
+
+  async isHaveInsurance(rent: Rent): Promise<boolean> {
+    const isMySafe = (addon) => addon.name.includes('마이세이프');
+    return !!rent.addons.find(isMySafe);
+  }
+
+  async startInsurance(
+    rent: Rent,
+    kickboard: InternalKickboard,
+  ): Promise<Rent> {
+    if (rent.insuranceId) return rent;
+    const provider = 'mertizfire';
+    const { platformId } = this;
+    const { kickboardCode, user } = rent;
+    const { userId, phoneNo } = user;
+    const { latitude, longitude } = await kickboard
+      .getLatestStatus()
+      .then((k) => k.gps);
+    const insuranceClient = InternalClient.getInsurance();
+    const phone = `+82${phoneNo.replace(/-/g, '').substring(1)}`;
+    const { insuranceId } = await insuranceClient.start({
+      provider,
+      userId,
+      platformId,
+      kickboardCode,
+      phone,
+      latitude,
+      longitude,
+    });
+
+    this.logger.log(
+      `Insurance - ${rent.name}(${rent.rentId}) has request insurance (${insuranceId}).`,
+    );
+
+    return this.rentRepository.merge(rent, { insuranceId }).save();
+  }
+
+  async stopInsurance(rent: Rent): Promise<Rent> {
+    if (!rent.insuranceId) return rent;
+    await InternalClient.getInsurance()
+      .getInsurance(rent.insuranceId)
+      .then((insurance) => insurance.end);
+
+    this.logger.log(
+      `Insurance - ${rent.name}(${rent.rentId}) has ended requested insurance (${rent.insuranceId}).`,
+    );
+
+    return this.rentRepository.merge(rent, { insuranceId: null }).save();
   }
 
   async light(rent: Rent, lightOn: boolean): Promise<Rent> {
@@ -240,11 +305,13 @@ export class RentService {
       .add(30, 'days')
       .toDate();
 
-    const { phoneNo } = rent.user;
+    const { user } = rent;
     const payment = await this.paymentService.getLastPaymentByRent(rent);
+    const { code } = await this.tokenService.createToken(rent.user);
     const card = payment.card || { name: '알 수 없음' };
-    await this.phoneService.send(phoneNo, 'mykick_arrived', {
-      link: 'https://my.hikick.kr',
+    const link = `https://my.hikick.kr/?code=${code}&url=/rents/${rent.rentId}`;
+    await this.phoneService.send(user.phoneNo, 'mykick_arrived', {
+      link,
       rent,
       card,
     });
@@ -310,11 +377,13 @@ export class RentService {
       const kickboard = await this.getKickboardByRent(rent, true);
       await kickboard.update({ mode: InternalKickboardMode.MYKICK });
 
-      const { phoneNo } = rent.user;
+      const { user } = rent;
       const payment = await this.paymentService.getLastPaymentByRent(rent);
       const card = payment.card || { name: '알 수 없음' };
-      await this.phoneService.send(phoneNo, 'mykick_departed', {
-        link: 'https://my.hikick.kr',
+      const { code } = await this.tokenService.createToken(user);
+      const link = `https://my.hikick.kr/?code=${code}&url=/rents/${rent.rentId}`;
+      await this.phoneService.send(user.phoneNo, 'mykick_departed', {
+        link,
         rent,
         card,
       });
