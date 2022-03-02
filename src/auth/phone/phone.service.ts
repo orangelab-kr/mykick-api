@@ -91,7 +91,7 @@ export class PhoneService {
     if (!endpoint) throw Opcode.InvalidError();
     const accessKeyId = _.get(process.env, 'MG_ACCESS_KEY_ID');
     const secretAccessKey = _.get(process.env, 'MG_SECRET_ACCESS_KEY');
-    const phone = `+82${phoneNo.replace(/-/, '').substring(1)}`;
+    const phone = `+82${phoneNo.replace(/-/g, '').substring(1)}`;
     await superagent
       .post(`${endpoint}/send`)
       .set('X-MESSAGE-GATEWAY-ACCESS-KEY-ID', accessKeyId)
