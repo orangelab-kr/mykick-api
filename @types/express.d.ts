@@ -15,6 +15,7 @@ declare global {
       card: Card;
       addon: Addon;
       rent: Rent;
+      addon: Addon;
       internal: InternalJwtDto;
       loggined: {
         session: Session;

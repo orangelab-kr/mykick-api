@@ -19,6 +19,16 @@ export class AddonService {
     return this.addonRepository.create(payload).save();
   }
 
+  async getOrThrow(addonId: string): Promise<Addon> {
+    const addon = await this.addonRepository.findOne({ addonId });
+    if (!addon) throw Opcode.CannotFindAddon();
+    return addon;
+  }
+
+  async get(addonId: string): Promise<Addon | null> {
+    return this.addonRepository.findOne({ addonId });
+  }
+
   async getByName(name: string): Promise<Addon | null> {
     return this.addonRepository.findOne({ name });
   }
