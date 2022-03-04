@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ExtendRentDto } from '../../rent/dto/extend-rent.dto';
 import { GetRentsDto } from '../../rent/dto/get-rents.dto';
 import { UpdateRentDto } from '../../rent/dto/update-rent.dto';
 import { Rent } from '../../rent/entities/rent.entity';
@@ -28,6 +29,13 @@ export class InternalRentController {
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
   async update(@RentDecorator() beforeRent: Rent, @Body() body: UpdateRentDto) {
     const rent = await this.rentService.update(beforeRent, body);
+    return { rent };
+  }
+
+  @Post(':rentId/extend')
+  @ApiParam({ name: 'rentId', description: '렌트 ID' })
+  async extend(@RentDecorator() beforeRent: Rent, @Body() body: ExtendRentDto) {
+    const rent = await this.rentService.extend(beforeRent, body);
     return { rent };
   }
 }

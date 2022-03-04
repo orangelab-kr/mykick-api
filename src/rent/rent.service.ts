@@ -21,6 +21,7 @@ import { PricingService } from '../pricing/pricing.service';
 import { User } from '../user/entities/user.entity';
 import { ActivateRentDto } from './dto/activate-rent.dto';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
+import { ExtendRentDto } from './dto/extend-rent.dto';
 import { GetRentsDto } from './dto/get-rents.dto';
 import { RequestRentDto } from './dto/request-rent.dto';
 import { UpdateRentDto } from './dto/update-rent.dto';
@@ -71,17 +72,62 @@ export class RentService {
     return rent;
   }
 
+  async extend(beforeRent: Rent, payload: ExtendRentDto): Promise<Rent> {
+    const { user } = beforeRent;
+    const { pricingId, addonIds } = payload;
+    const isLastMonthOfContract = beforeRent.remainingMonths < 0;
+    const isUnderOneMonthLeft = dayjs(beforeRent.expiredAt)
+      .subtract(30, 'days')
+      .isBefore(dayjs());
+    if (isLastMonthOfContract || !isUnderOneMonthLeft) {
+      throw Opcode.RentHasRemainingMonthsYet();
+    }
+
+    const [pricing, addons] = await Promise.all([
+      this.pricingService.findOneOrThrow(pricingId),
+      this.addonService.getManyByIds(addonIds),
+    ]);
+
+    const remainingMonths = beforeRent.remainingMonths + pricing.periodMonths;
+    const expiredAt = dayjs(beforeRent.expiredAt).add(30, 'days').toDate();
+    const rent = this.rentRepository.merge(beforeRent, {
+      pricing,
+      addons,
+      expiredAt,
+      remainingMonths,
+    });
+
+    const month = dayjs(rent.expiredAt).month() + 1;
+    const name = `${month}월달 이용(계약 연장)`;
+    const items = this.paymentService.generateItems(rent, true);
+    const payment = await this.paymentService.purchase(user, {
+      name,
+      items,
+      rent,
+    });
+
+    _.set(payment, 'amount', `${payment.amount.toLocaleString()}원`);
+    const nextPaymentDate = dayjs(rent.expiredAt).format('M월 DD일');
+    await this.phoneService.send(user.phoneNo, 'mykick_extend', {
+      rent,
+      payment,
+      nextPaymentDate,
+    });
+
+    return rent.save();
+  }
+
   async control(rent: Rent, enabled: boolean): Promise<Rent> {
     if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
     const kickboard = await this.getKickboardByRent(rent);
     if (enabled) {
-      // await kickboard.start();
+      await kickboard.start();
       this.logger.log(`${rent.name}(${rent.rentId}) has started ride.`);
       if (this.isHaveInsurance(rent)) {
         await this.startInsurance(rent, kickboard);
       }
     } else {
-      // await kickboard.stop();
+      await kickboard.stop();
       await this.stopInsurance(rent);
       this.logger.log(`${rent.name}(${rent.rentId}) has terminated ride.`);
     }

@@ -7,7 +7,7 @@ import { PricingService } from '../../pricing/pricing.service';
 
 @ApiBearerAuth()
 @ApiTags('관리자 / 가격표')
-@Controller({ path: 'internal/pricing', version: '1' })
+@Controller({ path: 'internal/pricings', version: '1' })
 export class InternalPricingController {
   constructor(private readonly pricingService: PricingService) {}
 
