@@ -9,7 +9,9 @@ describe('InternalPricingController', () => {
       controllers: [InternalPricingController],
     }).compile();
 
-    controller = module.get<InternalPricingController>(InternalPricingController);
+    controller = module.get<InternalPricingController>(
+      InternalPricingController,
+    );
   });
 
   it('should be defined', () => {

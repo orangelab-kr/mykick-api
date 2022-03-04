@@ -1,5 +1,5 @@
 import { ApiPropertyOptional, IntersectionType } from '@nestjs/swagger';
-import { IsArray, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator';
 import shortUUID from 'short-uuid';
 import { TransferArray } from '../../common/decorators/transfer-array';
 import { RequestOrderByDto } from '../../common/dto/request-order-by.dto';
@@ -24,6 +24,10 @@ export class GetPaymentsDto extends IntersectionType(
   @TransferArray()
   @IsString({ each: true })
   userIds?: string[];
+
+  @IsBoolean()
+  @IsOptional()
+  hideCancelled?: boolean;
 
   @ApiPropertyOptional({
     isArray: true,

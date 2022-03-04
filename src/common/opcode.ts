@@ -85,4 +85,9 @@ export const Opcode = {
     HttpStatus.BAD_REQUEST,
     '아직 계약 기간이 남아있습니다.',
   ),
+  CannotFindPayment: $(
+    26,
+    HttpStatus.NOT_FOUND,
+    '결제 내역을 찾을 수 없습니다.',
+  ),
 };

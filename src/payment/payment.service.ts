@@ -44,6 +44,16 @@ export class PaymentService {
     });
   }
 
+  async getOrThrow(user: User, paymentId: string): Promise<Payment> {
+    const payment = await this.get(user, paymentId);
+    if (!payment) throw Opcode.CannotFindPayment();
+    return payment;
+  }
+
+  async get(user: User, paymentId: string): Promise<Payment | undefined> {
+    return this.paymentRepository.findOne({ user, paymentId });
+  }
+
   async purchase(user: User, payload: PurchasePaymentDto): Promise<Payment> {
     const { name, items, rent } = payload;
     const amount = this.calculateAmount(items);
@@ -97,6 +107,7 @@ export class PaymentService {
     if (payload.skip) find.skip = payload.skip;
     if (payload.userIds) where.user = { userId: In(payload.userIds) };
     if (payload.rentIds) where.rent = { rentId: In(payload.rentIds) };
+    if (payload.hideCancelled) where.cancelledAt = null;
     find.where = generateWhere<Rent>(where, payload.search, searchTarget);
     const [payments, total] = await this.paymentRepository.findAndCount(find);
     return { payments, total };

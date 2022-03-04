@@ -1,8 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CancelPaymentDto {
   @IsString()
-  @ApiProperty({ example: '실수 환불 요청' })
-  reason: string;
+  @IsOptional()
+  @ApiPropertyOptional({ example: '실수 환불 요청' })
+  reason?: string;
 }
