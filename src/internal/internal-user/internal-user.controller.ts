@@ -7,18 +7,18 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { UserDecorator } from '../../user/user.decorator';
-import { UserService } from '../../user/user.service';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
+import _ from 'lodash';
+import { CancelPaymentDto } from '../../payment/dto/cancel-payment.dto';
+import { GetPaymentsDto } from '../../payment/dto/get-payments.dto';
+import { PurchasePaymentWithAmountDto } from '../../payment/dto/purchase-payment-with-amount.dto';
+import { PaymentDecorator } from '../../payment/payment.decorator';
+import { PaymentService } from '../../payment/payment.service';
 import { CreateUserDto } from '../../user/dto/create-user.dto';
 import { UpdateUserDto } from '../../user/dto/update-user.dto';
 import { User } from '../../user/entities/user.entity';
-import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
-import { GetPaymentsDto } from '../../payment/dto/get-payments.dto';
-import { PaymentService } from '../../payment/payment.service';
-import _ from 'lodash';
-import { PurchasePaymentDto } from '../../payment/dto/purchase-payment.dto';
-import { PaymentDecorator } from '../../payment/payment.decorator';
-import { CancelPaymentDto } from '../../payment/dto/cancel-payment.dto';
+import { UserDecorator } from '../../user/user.decorator';
+import { UserService } from '../../user/user.service';
 
 @ApiTags('관리자 / 사용자')
 @Controller({ path: 'internal/users', version: '1' })
@@ -82,7 +82,7 @@ export class InternalUserController {
   @ApiParam({ name: 'userId', description: '사용자 ID' })
   async createPayments(
     @UserDecorator() user: User,
-    @Body() body: PurchasePaymentDto,
+    @Body() body: PurchasePaymentWithAmountDto,
   ) {
     const payment = await this.paymentService.purchase(user, body);
     return { payment };

@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  forwardRef,
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AddonModule } from '../addon/addon.module';
 import { PhoneModule } from '../auth/phone/phone.module';
@@ -17,9 +22,9 @@ import { RentService } from './rent.service';
   imports: [
     AddonModule,
     PricingModule,
-    PaymentModule,
     PhoneModule,
     TokenModule,
+    forwardRef(() => PaymentModule),
     TypeOrmModule.forFeature([Rent]),
   ],
 })

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
 import _ from 'lodash';
@@ -36,6 +36,7 @@ export class RentService {
     private readonly rentRepository: Repository<Rent>,
     private readonly pricingService: PricingService,
     private readonly addonService: AddonService,
+    @Inject(forwardRef(() => PaymentService))
     private readonly paymentService: PaymentService,
     private readonly phoneService: PhoneService,
     private readonly tokenService: TokenService,
@@ -47,10 +48,15 @@ export class RentService {
     const rent = await this.request(user, _.omit(payload, 'cardId'));
 
     try {
+      const { rentId } = rent;
       const month = dayjs().month() + 1;
       const name = `${month}월달 이용료(첫 이용❤️)`;
       const items = this.paymentService.generateItems(rent, true);
-      payment = await this.paymentService.purchase(user, { name, items, rent });
+      payment = await this.paymentService.purchaseWithItems(user, {
+        name,
+        items,
+        rentId,
+      });
     } catch (err) {
       await this.remove(rent);
       this.logger.warn(
@@ -73,7 +79,7 @@ export class RentService {
   }
 
   async extend(beforeRent: Rent, payload: ExtendRentDto): Promise<Rent> {
-    const { user } = beforeRent;
+    const { user, rentId } = beforeRent;
     const { pricingId, addonIds } = payload;
     const isLastMonthOfContract = beforeRent.remainingMonths < 0;
     const isUnderOneMonthLeft = dayjs(beforeRent.expiredAt)
@@ -100,10 +106,10 @@ export class RentService {
     const month = dayjs(rent.expiredAt).month() + 1;
     const name = `${month}월달 이용(계약 연장)`;
     const items = this.paymentService.generateItems(rent, true);
-    const payment = await this.paymentService.purchase(user, {
+    const payment = await this.paymentService.purchaseWithItems(user, {
       name,
       items,
-      rent,
+      rentId,
     });
 
     _.set(payment, 'amount', `${payment.amount.toLocaleString()}원`);

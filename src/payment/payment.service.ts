@@ -9,9 +9,11 @@ import { Card, CardType } from '../card/entities/card.entity';
 import { Opcode } from '../common/opcode';
 import { generateWhere, WhereType } from '../common/tools/generate-where';
 import { Rent } from '../rent/entities/rent.entity';
+import { RentService } from '../rent/rent.service';
 import { User } from '../user/entities/user.entity';
 import { GetPaymentsDto } from './dto/get-payments.dto';
-import { PurchasePaymentDto } from './dto/purchase-payment.dto';
+import { PurchasePaymentWithAmountDto } from './dto/purchase-payment-with-amount.dto';
+import { PurchasePaymentWithItemsDto } from './dto/purchase-payment-with-items.dto';
 import { Payment, PaymentItem, PaymentType } from './entities/payment.entity';
 
 @Injectable()
@@ -23,6 +25,8 @@ export class PaymentService {
     private readonly paymentRepository: Repository<Payment>,
     @Inject(forwardRef(() => CardService))
     private readonly cardService: CardService,
+    @Inject(forwardRef(() => RentService))
+    private readonly rentService: RentService,
   ) {}
 
   public readonly productName = '마이킥 정기구독';
@@ -54,9 +58,13 @@ export class PaymentService {
     return this.paymentRepository.findOne({ user, paymentId });
   }
 
-  async purchase(user: User, payload: PurchasePaymentDto): Promise<Payment> {
-    const { name, items, rent } = payload;
-    const amount = this.calculateAmount(items);
+  async purchase(
+    user: User,
+    payload: PurchasePaymentWithAmountDto,
+  ): Promise<Payment> {
+    const { name, amount, rentId } = payload;
+    const rent = await this.rentService.getOrThrow(rentId);
+    const items = _.get(payload, 'items', []);
     this.logger.log(
       `${user.name}(${user.userId}) has now trying to pay ${amount}won.`,
     );
@@ -78,6 +86,14 @@ export class PaymentService {
     }
 
     throw Opcode.PaymentFailed();
+  }
+
+  async purchaseWithItems(
+    user: User,
+    payload: PurchasePaymentWithItemsDto,
+  ): Promise<Payment> {
+    const amount = this.calculateAmount(payload.items);
+    return this.purchase(user, _.merge(payload, { amount }));
   }
 
   async getMany(
@@ -183,7 +199,6 @@ export class PaymentService {
     const { body } = await superagent
       .post(`${endpoint}/direct/invoke`)
       .send({ billingKey, productName, amount, realname, phone });
-
     if (body.opcode === 0) {
       this.logger.log(
         `CARD - ${user.name}(${user.userId}) has successfully paid with ${card.name}(${card.cardId}) card. (paymentId: ${paymentId})`,
@@ -210,6 +225,7 @@ export class PaymentService {
 
     throw Opcode.PaymentFailed({ message: body.msg });
   }
+
   async purchaseWithToss(props: {
     user: User;
     card: Card;
