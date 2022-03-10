@@ -5,38 +5,17 @@ provider:
   name: aws
   runtime: nodejs14.x
   region: ap-northeast-2
-  stage: ${env:NODE_ENV}
+  stage: dev
   lambdaHashingVersion: '20201221'
   apiGateway:
     shouldStartNameWithService: true
-  environment:
-    DB_DATABASE: ${env:DB_DATABASE}
-    DB_HOST: ${env:DB_HOST}
-    DB_PASSWORD: ${env:DB_PASSWORD}
-    DB_PORT: ${env:DB_PORT}
-    DB_USERNAME: ${env:DB_USERNAME}
-    HIKICK_CORESERVICE_PAYMENTS_URL: ${env:HIKICK_CORESERVICE_PAYMENTS_URL}
-    HIKICK_MYKICK_KEY: ${env:HIKICK_MYKICK_KEY}
-    HIKICK_OPENAPI_ISSUER: ${env:HIKICK_OPENAPI_ISSUER}
-    HIKICK_OPENAPI_KICKBOARD_KEY: ${env:HIKICK_OPENAPI_KICKBOARD_KEY}
-    HIKICK_OPENAPI_KICKBOARD_URL: ${env:HIKICK_OPENAPI_KICKBOARD_URL}
-    MG_ACCESS_KEY_ID: ${env:MG_ACCESS_KEY_ID}
-    MG_ENDPOINT: ${env:MG_ENDPOINT}
-    MG_SECRET_ACCESS_KEY: ${env:MG_SECRET_ACCESS_KEY}
-    NODE_ENV: ${env:NODE_ENV}
-    PHONE_BYPASS_CODE: ${env:PHONE_BYPASS_CODE}
-    PHONE_DALIY_LIMIT: ${env:PHONE_DALIY_LIMIT}
-    TOSS_API_KEY: ${env:TOSS_API_KEY}
-    TOSS_CALLBACK_URL: ${env:TOSS_CALLBACK_URL}
-    TOSS_ENDPOINT: ${env:TOSS_ENDPOINT}
-    TOSS_FAILURE_URL: ${env:TOSS_FAILURE_URL}
-    TOSS_SUCCESS_URL: ${env:TOSS_SUCCESS_URL}
 
 package:
   individually: true
 
 plugins:
   - serverless-webpack
+  - serverless-doppler
   - serverless-offline
 
 custom:
@@ -54,9 +33,6 @@ functions:
   app:
     handler: src/main.handler
     events:
-      - http:
-          method: ANY
-          path: /
       - http:
           method: ANY
           path: '{proxy+}'
