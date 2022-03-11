@@ -147,6 +147,8 @@ export class PaymentService {
   }
 
   async refund(payment: Payment, props: { reason?: string }): Promise<Payment> {
+    if (payment.cancelledAt) return payment;
+
     const { reason } = props;
     const { token, amount, card } = payment;
     const payload = { token, amount, reason };

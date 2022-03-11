@@ -18,6 +18,7 @@ import { generateWhere, WhereType } from '../common/tools/generate-where';
 import { Payment, PaymentItem } from '../payment/entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PricingService } from '../pricing/pricing.service';
+import { ProviderService } from '../provider/provider.service';
 import { User } from '../user/entities/user.entity';
 import { ActivateRentDto } from './dto/activate-rent.dto';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
@@ -40,6 +41,7 @@ export class RentService {
     private readonly paymentService: PaymentService,
     private readonly phoneService: PhoneService,
     private readonly tokenService: TokenService,
+    private readonly providerService: ProviderService,
   ) {}
 
   public readonly platformId = _.get(process.env, 'HIKICK_PLATFORM_ID');
@@ -67,8 +69,11 @@ export class RentService {
     }
 
     const { card } = payment;
-    const { code } = await this.tokenService.createToken(user);
-    const link = `https://my.hikick.kr/?code=${code}&url=/rents/${rent.rentId}`;
+    const link = await this.tokenService.generateUrl(
+      user,
+      `/rents/${rent.rentId}`,
+    );
+
     await this.phoneService.send(user.phoneNo, 'mykick_requested', {
       link,
       rent,
@@ -241,10 +246,14 @@ export class RentService {
   }
 
   async request(user: User, payload: RequestRentDto): Promise<Rent> {
-    const { name } = payload;
-    const rent = await this.getEstimate(_.omit(payload, 'name'));
+    const { providerCode, name } = payload;
+    const provider = await this.providerService.findOneByCode(providerCode);
+    const rent = await this.getEstimate(
+      _.omit(payload, 'name', 'providerCode'),
+    );
+
     this.logger.log(`${user.name}(${user.userId}) has been requested new rent`);
-    return this.rentRepository.merge(rent, { user, name }).save();
+    return this.rentRepository.merge(rent, { user, name, provider }).save();
   }
 
   async getKickboardByRent(
@@ -359,9 +368,12 @@ export class RentService {
 
     const { user } = rent;
     const payment = await this.paymentService.getLastPaymentByRent(rent);
-    const { code } = await this.tokenService.createToken(rent.user);
     const card = payment.card || { name: '알 수 없음' };
-    const link = `https://my.hikick.kr/?code=${code}&url=/rents/${rent.rentId}`;
+    const link = await this.tokenService.generateUrl(
+      user,
+      `/rents/${rent.rentId}`,
+    );
+
     await this.phoneService.send(user.phoneNo, 'mykick_arrived', {
       link,
       rent,
@@ -432,8 +444,11 @@ export class RentService {
       const { user } = rent;
       const payment = await this.paymentService.getLastPaymentByRent(rent);
       const card = payment.card || { name: '알 수 없음' };
-      const { code } = await this.tokenService.createToken(user);
-      const link = `https://my.hikick.kr/?code=${code}&url=/rents/${rent.rentId}`;
+      const link = await this.tokenService.generateUrl(
+        user,
+        `/rents/${rent.rentId}`,
+      );
+
       await this.phoneService.send(user.phoneNo, 'mykick_departed', {
         link,
         rent,

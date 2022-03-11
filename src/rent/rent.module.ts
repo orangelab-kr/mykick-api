@@ -10,6 +10,7 @@ import { PhoneModule } from '../auth/phone/phone.module';
 import { TokenModule } from '../auth/token/token.module';
 import { PaymentModule } from '../payment/payment.module';
 import { PricingModule } from '../pricing/pricing.module';
+import { ProviderModule } from '../provider/provider.module';
 import { Rent } from './entities/rent.entity';
 import { RentController } from './rent.controller';
 import { RentMiddleware } from './rent.middleware';
@@ -24,6 +25,7 @@ import { RentService } from './rent.service';
     PricingModule,
     PhoneModule,
     TokenModule,
+    ProviderModule,
     forwardRef(() => PaymentModule),
     TypeOrmModule.forFeature([Rent]),
   ],

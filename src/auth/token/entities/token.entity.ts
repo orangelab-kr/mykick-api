@@ -40,7 +40,7 @@ export class Token extends BaseEntity {
     example: dayjs().add(1, 'month'),
     description: '만료일',
   })
-  expiredAt?: Date;
+  expiredAt: Date;
 
   @ApiProperty({ example: dayjs() })
   @CreateDateColumn()
@@ -57,6 +57,11 @@ export class Token extends BaseEntity {
 
   @BeforeInsert()
   private generateToken() {
-    this.code = crypto.randomBytes(95).toString('base64');
+    this.code = crypto.randomBytes(32).toString('hex');
+  }
+
+  @BeforeInsert()
+  private setExpiredAt() {
+    this.expiredAt = dayjs().add(1, 'month').toDate();
   }
 }

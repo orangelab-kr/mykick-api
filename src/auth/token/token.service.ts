@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import _ from 'lodash';
 import { MoreThan, Repository } from 'typeorm';
 import { Opcode } from '../../common/opcode';
 import { User } from '../../user/entities/user.entity';
@@ -11,6 +12,18 @@ export class TokenService {
     @InjectRepository(Token)
     private readonly tokenRepository: Repository<Token>,
   ) {}
+
+  public readonly url = _.get(
+    process.env,
+    'MYKICK_URL',
+    'https://my.hikick.kr',
+  );
+
+  async generateUrl(user: User, path: string): Promise<string> {
+    const { code } = await this.createToken(user);
+    const params = new URLSearchParams({ code, path });
+    return `${this.url}/auth/token?${params.toString()}`;
+  }
 
   async getUserByCode(code: string): Promise<User> {
     const expiredAt = MoreThan(new Date());
