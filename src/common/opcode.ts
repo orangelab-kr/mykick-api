@@ -90,4 +90,10 @@ export const Opcode = {
     HttpStatus.NOT_FOUND,
     '결제 내역을 찾을 수 없습니다.',
   ),
+  CannotFindProvider: $(27, HttpStatus.NOT_FOUND, '제공자를 찾을 수 없습니다.'),
+  ExistsProviderName: $(
+    27,
+    HttpStatus.CONFLICT,
+    '이미 사용중인 제공자 이름입니다.',
+  ),
 };

@@ -8,6 +8,7 @@ import { Token } from '../auth/token/entities/token.entity';
 import { Card } from '../card/entities/card.entity';
 import { Payment } from '../payment/entities/payment.entity';
 import { Pricing } from '../pricing/entities/pricing.entity';
+import { Provider } from '../provider/entities/provider.entity';
 import { Rent } from '../rent/entities/rent.entity';
 import { User } from '../user/entities/user.entity';
 
@@ -30,6 +31,7 @@ import { User } from '../user/entities/user.entity';
         Pricing,
         Rent,
         User,
+        Provider,
       ],
       keepConnectionAlive: true,
       synchronize: false,

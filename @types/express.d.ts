@@ -5,6 +5,7 @@ import { Card } from '../src/card/entities/card.entity';
 import { InternalJwtDto } from '../src/internal/dto/internal-jwt.dto';
 import { Payment } from '../src/payment/entities/payment.entity';
 import { Pricing } from '../src/pricing/entities/pricing.entity';
+import { Provider } from '../src/provider/entities/provider.entity';
 import { Rent } from '../src/rent/entities/rent.entity';
 import { User } from '../src/user/entities/user.entity';
 
@@ -13,6 +14,7 @@ declare global {
     interface Request {
       user: User;
       pricing: Pricing;
+      provider: Provider;
       card: Card;
       addon: Addon;
       rent: Rent;
