@@ -19,9 +19,9 @@ export class TokenService {
     'https://my.hikick.kr',
   );
 
-  async generateUrl(user: User, path: string): Promise<string> {
+  async generateUrl(user: User, url: string): Promise<string> {
     const { code } = await this.createToken(user);
-    const params = new URLSearchParams({ code, path });
+    const params = new URLSearchParams({ code, url });
     return `${this.url}/auth/token?${params.toString()}`;
   }
 

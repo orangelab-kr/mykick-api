@@ -62,6 +62,6 @@ export class Token extends BaseEntity {
 
   @BeforeInsert()
   private setExpiredAt() {
-    this.expiredAt = dayjs().add(1, 'month').toDate();
+    this.expiredAt = dayjs().add(6, 'month').toDate();
   }
 }
