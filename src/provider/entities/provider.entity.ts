@@ -8,7 +8,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  ManyToOne,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -31,7 +31,7 @@ export class Provider extends BaseEntity {
   @IsString()
   code: string;
 
-  @ManyToOne(() => Rent, (rent) => rent.provider)
+  @OneToMany(() => Rent, (rent) => rent.provider, { onDelete: 'CASCADE' })
   rents: Rent[];
 
   @IsDate()

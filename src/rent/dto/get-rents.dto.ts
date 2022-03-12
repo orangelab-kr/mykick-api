@@ -11,7 +11,12 @@ export class GetRentsDto extends IntersectionType(
   IntersectionType(RequestPagniationDto, RequestSearchDto),
   class extends RequestOrderByDto<
     Rent,
-    'name' | 'remainingMonths' | 'activatedAt' | 'createdAt' | 'updatedAt'
+    | 'name'
+    | 'remainingMonths'
+    | 'expiredAt'
+    | 'activatedAt'
+    | 'createdAt'
+    | 'updatedAt'
   > {},
 ) {
   @ApiPropertyOptional({
@@ -23,7 +28,7 @@ export class GetRentsDto extends IntersectionType(
   @IsOptional()
   @TransferArray()
   @IsString({ each: true })
-  userIds: string[];
+  userIds?: string[];
 
   @ApiPropertyOptional({
     isArray: true,
@@ -34,5 +39,5 @@ export class GetRentsDto extends IntersectionType(
   @IsOptional()
   @TransferArray()
   @IsEnum(RentStatus, { each: true })
-  status: RentStatus[];
+  status?: RentStatus[];
 }

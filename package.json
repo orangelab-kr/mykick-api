@@ -11,6 +11,7 @@
     "deploy": "sls deploy",
     "offline": "sls offline",
     "package": "sls package",
+    "start:extend": "sls invoke local --function extend",
     "start": "doppler run --command \"nest start\"",
     "start:dev": "doppler run --command \"nest start --watch\"",
     "start:debug": "doppler run --command \"nest start --debug --watch\"",

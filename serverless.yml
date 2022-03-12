@@ -6,7 +6,6 @@ provider:
   runtime: nodejs14.x
   region: ap-northeast-2
   stage: dev
-  lambdaHashingVersion: '20201221'
   apiGateway:
     shouldStartNameWithService: true
 
@@ -36,3 +35,7 @@ functions:
       - http:
           method: ANY
           path: '{proxy+}'
+  extend:
+    handler: src/schedulers/extend.scheduler.handler
+    events:
+      - schedule: 'cron(0 1 ? * 2-6 *)'
