@@ -12,7 +12,7 @@ import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { PhoneService } from '../auth/phone/phone.service';
 import { TokenService } from '../auth/token/token.service';
-import { InternalClient } from '../common/internalClient';
+import { InternalClient } from '../common/tools/internalClient';
 import { Opcode } from '../common/opcode';
 import { generateWhere, WhereType } from '../common/tools/generate-where';
 import { Payment, PaymentItem } from '../payment/entities/payment.entity';
@@ -27,6 +27,7 @@ import { GetRentsDto } from './dto/get-rents.dto';
 import { RequestRentDto } from './dto/request-rent.dto';
 import { UpdateRentDto } from './dto/update-rent.dto';
 import { Rent, RentStatus } from './entities/rent.entity';
+import { reportMonitoringMetrics } from '../common/tools/monitoring';
 
 @Injectable()
 export class RentService {
@@ -80,6 +81,7 @@ export class RentService {
       card,
     });
 
+    await reportMonitoringMetrics('mykickRequest', { rent, card });
     return rent;
   }
 
@@ -327,6 +329,7 @@ export class RentService {
     const kickboardCode =
       payload.kickboardCode || (await this.getKickboardCodeByUrl(payload.url));
     if (rent.kickboardCode !== kickboardCode) throw Opcode.CannotActivateRent();
+    await reportMonitoringMetrics('mykickActivate', { rent });
     return this.activate(rent);
   }
 
