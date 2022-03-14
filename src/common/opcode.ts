@@ -96,4 +96,9 @@ export const Opcode = {
     HttpStatus.CONFLICT,
     '이미 사용중인 제공자 이름입니다.',
   ),
+  AlreadyAssignmentKickboard: $(
+    28,
+    HttpStatus.CONFLICT,
+    '이미 배정된 킥보드입니다.',
+  ),
 };

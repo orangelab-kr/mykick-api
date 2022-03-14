@@ -442,6 +442,10 @@ export class RentService {
     if (rent.status === RentStatus.Shipping) {
       if (!rent.kickboardCode) throw Opcode.NoKickboardInRent();
       const kickboard = await this.getKickboardByRent(rent, true);
+      if (kickboard.mode === InternalKickboardMode.MYKICK) {
+        throw Opcode.AlreadyAssignmentKickboard();
+      }
+
       await kickboard.update({ mode: InternalKickboardMode.MYKICK });
 
       const { user } = rent;
