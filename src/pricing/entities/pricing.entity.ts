@@ -52,7 +52,7 @@ export class Pricing extends BaseEntity {
     example: '가볍게 마이킥을 테스트할때 사용하기 좋은 상품입니다.',
   })
   @MaxLength(64, { message: '64자 이내로 작성해주세요.' })
-  description: string;
+  description?: string;
 
   @Column()
   @ApiProperty({ description: '이용할 계약기간(개월)', example: 6 })
