@@ -12,9 +12,10 @@ import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { PhoneService } from '../auth/phone/phone.service';
 import { TokenService } from '../auth/token/token.service';
-import { InternalClient } from '../common/tools/internalClient';
 import { Opcode } from '../common/opcode';
 import { generateWhere, WhereType } from '../common/tools/generate-where';
+import { InternalClient } from '../common/tools/internalClient';
+import { reportMonitoringMetrics } from '../common/tools/monitoring';
 import { Payment, PaymentItem } from '../payment/entities/payment.entity';
 import { PaymentService } from '../payment/payment.service';
 import { PricingService } from '../pricing/pricing.service';
@@ -22,12 +23,11 @@ import { ProviderService } from '../provider/provider.service';
 import { User } from '../user/entities/user.entity';
 import { ActivateRentDto } from './dto/activate-rent.dto';
 import { EstimateRentDto } from './dto/estimate-rent.dto';
-import { ExtendRentDto } from './dto/extend-rent.dto';
 import { GetRentsDto } from './dto/get-rents.dto';
+import { RenewalRentDto } from './dto/renewal-rent.dto';
 import { RequestRentDto } from './dto/request-rent.dto';
 import { UpdateRentDto } from './dto/update-rent.dto';
 import { Rent, RentStatus } from './entities/rent.entity';
-import { reportMonitoringMetrics } from '../common/tools/monitoring';
 
 @Injectable()
 export class RentService {
@@ -85,7 +85,7 @@ export class RentService {
     return rent;
   }
 
-  async extend(beforeRent: Rent, payload: ExtendRentDto): Promise<Rent> {
+  async renewal(beforeRent: Rent, payload: RenewalRentDto): Promise<Rent> {
     const { user, rentId } = beforeRent;
     const { pricingId, addonIds } = payload;
     const isLastMonthOfContract = beforeRent.remainingMonths < 0;

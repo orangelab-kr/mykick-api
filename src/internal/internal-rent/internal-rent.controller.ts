@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
-import { ExtendRentDto } from '../../rent/dto/extend-rent.dto';
 import { GetRentsDto } from '../../rent/dto/get-rents.dto';
+import { RenewalRentDto } from '../../rent/dto/renewal-rent.dto';
 import { UpdateRentDto } from '../../rent/dto/update-rent.dto';
 import { Rent } from '../../rent/entities/rent.entity';
 import { RentDecorator } from '../../rent/rent.decorator';
@@ -32,10 +32,13 @@ export class InternalRentController {
     return { rent };
   }
 
-  @Post(':rentId/extend')
+  @Post(':rentId/renewal')
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
-  async extend(@RentDecorator() beforeRent: Rent, @Body() body: ExtendRentDto) {
-    const rent = await this.rentService.extend(beforeRent, body);
+  async renewal(
+    @RentDecorator() beforeRent: Rent,
+    @Body() body: RenewalRentDto,
+  ) {
+    const rent = await this.rentService.renewal(beforeRent, body);
     return { rent };
   }
 }
