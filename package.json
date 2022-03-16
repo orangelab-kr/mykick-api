@@ -1,6 +1,6 @@
 {
   "name": "mykick-api",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Rent a kickboard and use it freely.",
   "author": "bakjonghun <bakjonghun@hikick.kr>",
   "private": true,

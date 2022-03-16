@@ -111,6 +111,12 @@ export class RentService {
       nextPaymentDate,
     });
 
+    await reportMonitoringMetrics('mykickExtend', {
+      rent,
+      payment,
+      nextPaymentDate,
+    });
+
     this.logger.log(
       `${rent.name}(${rent.rentId}) has been successfully extended. (${dayjs(
         expiredAt,
