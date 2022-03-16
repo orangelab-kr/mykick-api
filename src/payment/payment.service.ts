@@ -307,6 +307,8 @@ export class PaymentService {
       reason: props.reason,
     });
 
+    if (body.code === 0) return;
+    if (body.errorCode === 'REFUND_ALREADY_REFUNDED') return;
     this.logger.warn(`TOSS - Cannot refund with ${props.token} pay token.`);
     throw Opcode.PaymentFailed({ message: body.msg });
   }
