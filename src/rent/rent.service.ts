@@ -111,6 +111,12 @@ export class RentService {
       nextPaymentDate,
     });
 
+    this.logger.log(
+      `${rent.name}(${rent.rentId}) has been successfully extended. (${dayjs(
+        expiredAt,
+      ).format('YYYY/MM/DD')})`,
+    );
+
     return beforeRent.save();
   }
 
@@ -135,9 +141,11 @@ export class RentService {
       remainingMonths,
     });
 
-    console.log(rent);
-
     rent.addons = addons;
+    this.logger.log(
+      `${rent.name}(${rent.rentId}) contract is trying to extend. (${remainingMonths})`,
+    );
+
     return this.extend(rent, true);
   }
 
