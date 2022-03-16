@@ -36,6 +36,6 @@ functions:
           method: ANY
           path: '{proxy+}'
   extend:
-    handler: src/schedulers/extend.scheduler.handler
+    handler: src/schedulers/extend.handler
     events:
       - schedule: 'cron(0 1 ? * 2-6 *)'

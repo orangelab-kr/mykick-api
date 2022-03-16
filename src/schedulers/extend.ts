@@ -60,8 +60,6 @@ export const handler: Handler = async () => {
     skip += take;
     if (total <= skip) break;
   }
-
-  process.exit(0);
 };
 
 async function sendPaymentFailed(rent: Rent): Promise<void> {
