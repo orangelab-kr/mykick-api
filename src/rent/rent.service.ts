@@ -85,8 +85,36 @@ export class RentService {
     return rent;
   }
 
+  async extend(beforeRent: Rent, isRenewal = false): Promise<Rent> {
+    const { rentId, user } = beforeRent;
+    const remainingMonths = beforeRent.remainingMonths - 1;
+    const expiredAt = dayjs(beforeRent.expiredAt).add(30, 'days').toDate();
+    const rent = this.rentRepository.merge(beforeRent, {
+      expiredAt,
+      remainingMonths,
+    });
+
+    const month = dayjs(rent.expiredAt).month() + 1;
+    const name = `${month}월달 이용${isRenewal ? '(계약 연장)' : ''}`;
+    const items = this.paymentService.generateItems(rent, isRenewal);
+    const payment = await this.paymentService.purchaseWithItems(user, {
+      name,
+      items,
+      rentId,
+    });
+
+    _.set(payment, 'amount', `${payment.amount.toLocaleString()}원`);
+    const nextPaymentDate = dayjs(rent.expiredAt).format('M월 DD일');
+    await this.phoneService.send(user.phoneNo, 'mykick_extend', {
+      rent,
+      payment,
+      nextPaymentDate,
+    });
+
+    return beforeRent.save();
+  }
+
   async renewal(beforeRent: Rent, payload: RenewalRentDto): Promise<Rent> {
-    const { user, rentId } = beforeRent;
     const { pricingId, addonIds } = payload;
     const isLastMonthOfContract = beforeRent.remainingMonths < 0;
     const isUnderOneMonthLeft = dayjs(beforeRent.expiredAt)
@@ -102,32 +130,15 @@ export class RentService {
     ]);
 
     const remainingMonths = beforeRent.remainingMonths + pricing.periodMonths;
-    const expiredAt = dayjs(beforeRent.expiredAt).add(30, 'days').toDate();
     const rent = this.rentRepository.merge(beforeRent, {
       pricing,
-      addons,
-      expiredAt,
       remainingMonths,
     });
 
-    const month = dayjs(rent.expiredAt).month() + 1;
-    const name = `${month}월달 이용(계약 연장)`;
-    const items = this.paymentService.generateItems(rent, true);
-    const payment = await this.paymentService.purchaseWithItems(user, {
-      name,
-      items,
-      rentId,
-    });
+    console.log(rent);
 
-    _.set(payment, 'amount', `${payment.amount.toLocaleString()}원`);
-    const nextPaymentDate = dayjs(rent.expiredAt).format('M월 DD일');
-    await this.phoneService.send(user.phoneNo, 'mykick_extend', {
-      rent,
-      payment,
-      nextPaymentDate,
-    });
-
-    return rent.save();
+    rent.addons = addons;
+    return this.extend(rent, true);
   }
 
   async control(rent: Rent, enabled: boolean): Promise<Rent> {
@@ -324,7 +335,7 @@ export class RentService {
 
   async activateByUser(rent: Rent, payload: ActivateRentDto): Promise<Rent> {
     const { url } = payload;
-    if (rent.status !== RentStatus.Shipped) throw Opcode.CannotActivateRent();
+    if (rent.status !== RentStatus.Shipped) return rent;
     if (!url && !payload.kickboardCode) throw Opcode.CannotActivateRent();
     const kickboardCode =
       payload.kickboardCode || (await this.getKickboardCodeByUrl(payload.url));

@@ -32,6 +32,13 @@ export class InternalRentController {
     return { rent };
   }
 
+  @Post(':rentId/extend')
+  @ApiParam({ name: 'rentId', description: '렌트 ID' })
+  async extend(@RentDecorator() beforeRent: Rent) {
+    const rent = await this.rentService.extend(beforeRent);
+    return { rent };
+  }
+
   @Post(':rentId/renewal')
   @ApiParam({ name: 'rentId', description: '렌트 ID' })
   async renewal(
