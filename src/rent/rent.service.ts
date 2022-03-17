@@ -46,6 +46,7 @@ export class RentService {
   ) {}
 
   public readonly platformId = _.get(process.env, 'HIKICK_PLATFORM_ID');
+  public readonly paymentFailedMessage = '자동 결제를 실패하였습니다.';
   async requestAndPay(user: User, payload: RequestRentDto): Promise<Rent> {
     let payment: Payment | undefined;
     const rent = await this.request(user, _.omit(payload, 'cardId'));
@@ -123,7 +124,15 @@ export class RentService {
       ).format('YYYY/MM/DD')})`,
     );
 
-    return beforeRent.save();
+    if (
+      rent.status === RentStatus.Suspended &&
+      rent.message === this.paymentFailedMessage
+    ) {
+      rent.status = RentStatus.Activated;
+      rent.message = null;
+    }
+
+    return rent.save();
   }
 
   async renewal(beforeRent: Rent, payload: RenewalRentDto): Promise<Rent> {
@@ -397,13 +406,8 @@ export class RentService {
     const { user } = rent;
     const payment = await this.paymentService.getLastPaymentByRent(rent);
     const card = payment.card || { name: '알 수 없음' };
-    const link = await this.tokenService.generateUrl(
-      user,
-      `/rents/${rent.rentId}`,
-    );
-
     await this.phoneService.send(user.phoneNo, 'mykick_arrived', {
-      link,
+      link: 'https://i.hikick.kr/mykick/features',
       rent,
       card,
     });

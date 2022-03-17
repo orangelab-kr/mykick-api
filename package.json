@@ -1,6 +1,6 @@
 {
   "name": "mykick-api",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Rent a kickboard and use it freely.",
   "author": "bakjonghun <bakjonghun@hikick.kr>",
   "private": true,
@@ -70,7 +70,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^27.5.1",
-    "prettier": "^2.3.2",
+    "prettier": "^2.6.0",
     "run-script-webpack-plugin": "^0.0.11",
     "serverless": "^3.7.5",
     "serverless-doppler": "^1.0.2",

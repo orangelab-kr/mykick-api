@@ -12,13 +12,14 @@ import { RentService } from '../rent/rent.service';
 export const handler: Handler = async () => {
   const app = await NestFactory.create(AppModule);
   const rentService = app.get(RentService);
+  const message = rentService.paymentFailedMessage;
 
   let skip = 0;
   const take = 10;
   while (true) {
     const { rents, total } = await rentService.getMany({
       orderBy: { expiredAt: RequestOrderByType.desc },
-      status: [RentStatus.Activated],
+      status: [RentStatus.Activated, RentStatus.Suspended],
       take,
       skip,
     });
@@ -27,6 +28,14 @@ export const handler: Handler = async () => {
     for (const rent of rents) {
       try {
         const expiredAt = dayjs(rent.expiredAt);
+        if (rent.status === RentStatus.Suspended && rent.message !== message) {
+          Logger.log(
+            `${rent.name}(${rent.rentId}) Will not attempt to pay automatic payment. (${rent.message})`,
+          );
+
+          continue;
+        }
+
         if (expiredAt.startOf('day').isAfter(dayjs())) {
           const remainingDays = expiredAt.diff(dayjs(), 'days');
           Logger.log(`${rent.name}(${rent.rentId}) is not expired.`);
@@ -45,9 +54,10 @@ export const handler: Handler = async () => {
         Logger.log(`${rent.name}(${rent.rentId}) has retry to extend.`);
         await rentService.extend(rent, false);
       } catch (err) {
+        await rent.reload();
         const { opcode }: any = Opcode.PaymentFailed().getResponse();
         if (err.response.opcode === opcode) {
-          await sendPaymentFailed(rent);
+          await sendPaymentFailed(rent, rentService, message);
           continue;
         }
 
@@ -62,7 +72,16 @@ export const handler: Handler = async () => {
   }
 };
 
-async function sendPaymentFailed(rent: Rent): Promise<void> {
+async function sendPaymentFailed(
+  rent: Rent,
+  rentService: RentService,
+  message: string,
+): Promise<void> {
+  const status = RentStatus.Suspended;
+  if (rent.status !== status) {
+    await rentService.update(rent, { status, message });
+  }
+
   await reportMonitoringMetrics('mykickPaymentFailed', { rent });
   Logger.log(`${rent.name}(${rent.rentId}) has payment failed to extend.`);
 }
