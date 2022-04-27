@@ -47,7 +47,7 @@ export const handler: Handler = async () => {
         }
 
         if (rent.remainingMonths <= 0) {
-          await sendTerminateElapse(rent);
+          await sendTerminateElapse(rent, rentService);
           continue;
         }
 
@@ -97,11 +97,20 @@ async function sendTerminateSoon(
   );
 }
 
-async function sendTerminateElapse(rent: Rent): Promise<void> {
+async function sendTerminateElapse(
+  rent: Rent,
+  rentService: RentService,
+): Promise<void> {
   const expiredAt = dayjs(rent.expiredAt);
   const elapsedDays = dayjs().diff(expiredAt, 'days');
-  await reportMonitoringMetrics('mykickTerminate', { rent, elapsedDays });
+  if (rent.status !== RentStatus.Suspended) {
+    await rentService.update(rent, {
+      status: RentStatus.Suspended,
+      message: '계약 기간이 종료되었습니다.',
+    });
+  }
 
+  await reportMonitoringMetrics('mykickTerminate', { rent, elapsedDays });
   Logger.log(
     `${rent.name}(${rent.rentId}) are contract period has been terminated.`,
   );
