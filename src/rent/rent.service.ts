@@ -6,7 +6,7 @@ import {
   InternalKickboard,
   InternalKickboardMode,
   InternalKickboardStatus,
-} from 'openapi-internal-sdk';
+} from '@hikick/openapi-internal-sdk';
 import superagent from 'superagent';
 import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
