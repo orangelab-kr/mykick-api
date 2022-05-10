@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
-import _ from 'lodash';
+import _, { before } from 'lodash';
 import {
   InternalKickboard,
   InternalKickboardMode,
@@ -350,6 +350,10 @@ export class RentService {
     if (payload.take) find.take = payload.take;
     if (payload.skip) find.skip = payload.skip;
     if (payload.userIds) where.user = { userId: In(payload.userIds) };
+    if (payload.kickboardCodes) {
+      where.kickboardCode = In(payload.kickboardCodes);
+    }
+
     if (payload.status) where.status = In(payload.status);
     find.where = generateWhere<Rent>(where, payload.search, searchTarget);
     const [rents, total] = await this.rentRepository.findAndCount(find);

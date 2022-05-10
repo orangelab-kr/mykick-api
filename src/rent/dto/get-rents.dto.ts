@@ -40,4 +40,15 @@ export class GetRentsDto extends IntersectionType(
   @TransferArray()
   @IsEnum(RentStatus, { each: true })
   status?: RentStatus[];
+
+  @ApiPropertyOptional({
+    isArray: true,
+    description: '킥보드 코드',
+    example: ['DE20KP'],
+  })
+  @IsArray()
+  @IsOptional()
+  @TransferArray()
+  @IsString({ each: true })
+  kickboardCodes?: string[];
 }
