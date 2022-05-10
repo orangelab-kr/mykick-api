@@ -8,7 +8,7 @@ import {
   InternalKickboardStatus,
 } from '@hikick/openapi-internal-sdk';
 import superagent from 'superagent';
-import { FindConditions, FindManyOptions, In, Repository } from 'typeorm';
+import { FindConditions, FindManyOptions, In, Not, Repository } from 'typeorm';
 import { AddonService } from '../addon/addon.service';
 import { PhoneService } from '../auth/phone/phone.service';
 import { TokenService } from '../auth/token/token.service';
@@ -166,7 +166,7 @@ export class RentService {
 
   async control(rent: Rent, enabled: boolean): Promise<Rent> {
     if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
-    const kickboard = await this.getKickboardByRent(rent);
+    const kickboard = await this.getKickboard(rent.kickboardCode);
     if (enabled) {
       await kickboard.start();
       this.logger.log(`${rent.name}(${rent.rentId}) has started ride.`);
@@ -185,14 +185,14 @@ export class RentService {
   async getStatus(
     rent: Rent,
   ): Promise<Pick<InternalKickboardStatus, 'gps' | 'createdAt' | 'power'>> {
-    return this.getKickboardByRent(rent)
+    return this.getKickboard(rent.kickboardCode)
       .then((k) => k.getLatestStatus())
       .then((status) => _.pick(status, 'gps', 'createdAt', 'power'));
   }
 
   async alarm(rent: Rent): Promise<Rent> {
     if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
-    const kickboard = await this.getKickboardByRent(rent);
+    const kickboard = await this.getKickboard(rent.kickboardCode);
     if (!rent.enabled) await kickboard.start();
     await kickboard.alarmOn({ seconds: 5000 });
     if (!rent.enabled) await kickboard.stop();
@@ -250,7 +250,7 @@ export class RentService {
 
   async light(rent: Rent, lightOn: boolean): Promise<Rent> {
     if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
-    const kickboard = await this.getKickboardByRent(rent);
+    const kickboard = await this.getKickboard(rent.kickboardCode);
     lightOn ? await kickboard.lightOn({}) : await kickboard.lightOff();
     return this.update(rent, { lightOn });
   }
@@ -292,13 +292,13 @@ export class RentService {
     return this.rentRepository.merge(rent, { user, name, provider }).save();
   }
 
-  async getKickboardByRent(
-    rent: Rent,
+  async getKickboard(
+    kickboardCode: string,
     bypassModeValidate = false,
   ): Promise<InternalKickboard> {
     try {
       const client = InternalClient.getKickboard();
-      const kickboard = await client.getKickboard(rent.kickboardCode);
+      const kickboard = await client.getKickboard(kickboardCode);
       const validateMode = kickboard.mode !== InternalKickboardMode.MYKICK;
       if (!bypassModeValidate && validateMode) throw Error();
       return kickboard;
@@ -378,7 +378,16 @@ export class RentService {
 
   async update(rent: Rent, payload: UpdateRentDto): Promise<Rent> {
     const beforeStatus = rent.status;
+    const beforeKickboardCode = rent.kickboardCode;
     let updatedRent = this.rentRepository.merge(rent, payload);
+    if (beforeKickboardCode !== rent.kickboardCode) {
+      if (beforeKickboardCode) {
+        await this.detachKickboard(rent, beforeKickboardCode);
+      }
+
+      await this.attachKickboard(rent);
+    }
+
     if (updatedRent.status !== beforeStatus) {
       updatedRent = await this.changeStatus(updatedRent, beforeStatus);
       if (
@@ -426,15 +435,45 @@ export class RentService {
     return rent.save();
   }
 
+  async attachKickboard(rent: Rent): Promise<void> {
+    const { kickboardCode } = rent;
+    if (!kickboardCode) throw Opcode.NoKickboardInRent();
+    const status = Not(In([RentStatus.Terminated, RentStatus.Cancelled]));
+    const count = await this.rentRepository.count({ kickboardCode, status });
+    if (count > 0) throw Opcode.AlreadyAssignmentKickboard();
+    const kickboard = await this.getKickboard(kickboardCode, true);
+    await kickboard.update({
+      mode: InternalKickboardMode.MYKICK,
+    });
+
+    this.logger.log(
+      `${rent.kickboardCode} has been attached with ${rent.name}(${rent.rentId})`,
+    );
+  }
+
+  async detachKickboard(rent: Rent, kickboardCode?: string): Promise<void> {
+    try {
+      kickboardCode = kickboardCode || rent.kickboardCode;
+      const kickboard = await this.getKickboard(kickboardCode);
+      await kickboard.update({
+        mode: InternalKickboardMode.COLLECTED,
+      });
+
+      this.logger.log(
+        `${rent.kickboardCode} has been detached from ${rent.name}(${rent.rentId})`,
+      );
+    } catch (err) {
+      this.logger.log(
+        `${rent.kickboardCode} is already detach from ${rent.name}(${rent.rentId})`,
+      );
+    }
+  }
+
   async cancel(rent: Rent, refund = false): Promise<Rent> {
     rent.status = RentStatus.Cancelled;
     rent.cancelledAt = new Date();
 
-    if (rent.kickboardCode) {
-      const kickboard = await this.getKickboardByRent(rent);
-      await kickboard.update({ mode: InternalKickboardMode.COLLECTED });
-    }
-
+    if (rent.kickboardCode) await this.detachKickboard(rent);
     if (refund) {
       const reason = rent.message;
       const payments = await this.getPayments(rent);
@@ -474,14 +513,6 @@ export class RentService {
 
   async changeStatusFromRequested(rent: Rent): Promise<Rent> {
     if (rent.status === RentStatus.Shipping) {
-      if (!rent.kickboardCode) throw Opcode.NoKickboardInRent();
-      const kickboard = await this.getKickboardByRent(rent, true);
-      if (kickboard.mode === InternalKickboardMode.MYKICK) {
-        throw Opcode.AlreadyAssignmentKickboard();
-      }
-
-      await kickboard.update({ mode: InternalKickboardMode.MYKICK });
-
       const { user } = rent;
       const payment = await this.paymentService.getLastPaymentByRent(rent);
       const card = payment.card || { name: '알 수 없음' };
