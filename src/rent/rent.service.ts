@@ -396,6 +396,11 @@ export class RentService {
     return updatedRent.save();
   }
 
+  async terminate(rent: Rent): Promise<Rent> {
+    rent.status = RentStatus.Terminated;
+    return rent.save();
+  }
+
   async shipped(rent: Rent): Promise<Rent> {
     rent.status = RentStatus.Shipped;
     rent.remainingMonths--;
@@ -519,8 +524,9 @@ export class RentService {
   async changeStatusFromActivated(rent: Rent): Promise<Rent> {
     if (rent.status === RentStatus.Suspended) return this.suspended(rent);
     if (rent.status === RentStatus.Cancelled) return this.cancel(rent);
+    if (rent.status === RentStatus.Terminated) return this.terminate(rent);
     throw Opcode.CantChangeRentStatus({
-      message: '활성화된 렌트는 정지하거나 취소 처리만 가능합니다.',
+      message: '활성화된 렌트는 정지하거나 취소 또는 종료 처리만 가능합니다.',
     });
   }
 
@@ -534,8 +540,9 @@ export class RentService {
   async changeStatusFromSuspended(rent: Rent): Promise<Rent> {
     if (rent.status === RentStatus.Activated) return this.activate(rent);
     if (rent.status === RentStatus.Cancelled) return this.cancel(rent);
+    if (rent.status === RentStatus.Terminated) return this.terminate(rent);
     throw Opcode.CantChangeRentStatus({
-      message: '정지된 렌트는 재개하거나 취소만 가능합니다.',
+      message: '정지된 렌트는 재개하거나 취소 또는 종료 처리만 가능합니다.',
     });
   }
 
