@@ -448,6 +448,7 @@ export class RentService {
     const kickboard = await this.getKickboard(kickboardCode, true);
     await kickboard.update({
       mode: InternalKickboardMode.MYKICK,
+      maxSpeed: rent.maxSpeed,
     });
 
     this.logger.log(
@@ -461,6 +462,7 @@ export class RentService {
       const kickboard = await this.getKickboard(kickboardCode);
       await kickboard.update({
         mode: InternalKickboardMode.COLLECTED,
+        maxSpeed: null,
       });
 
       this.logger.log(

@@ -13,6 +13,7 @@ export class UpdateRentDto extends PartialType(
     'remainingMonths',
     'kickboardCode',
     'lightOn',
+    'maxSpeed',
     'activatedAt',
     'expiredAt',
   ] as const) {},
