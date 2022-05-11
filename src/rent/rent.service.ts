@@ -47,6 +47,9 @@ export class RentService {
 
   public readonly platformId = _.get(process.env, 'HIKICK_PLATFORM_ID');
   public readonly paymentFailedMessage = '자동 결제를 실패하였습니다.';
+  public readonly detachStatus = [RentStatus.Cancelled, RentStatus.Terminated];
+  public readonly messageStatus = [RentStatus.Cancelled, RentStatus.Suspended];
+
   async requestAndPay(user: User, payload: RequestRentDto): Promise<Rent> {
     let payment: Payment | undefined;
     const rent = await this.request(user, _.omit(payload, 'cardId'));
@@ -381,32 +384,38 @@ export class RentService {
   }
 
   async update(rent: Rent, payload: UpdateRentDto): Promise<Rent> {
-    const beforeStatus = rent.status;
-    const beforeKickboardCode = rent.kickboardCode;
-    let updatedRent = this.rentRepository.merge(rent, payload);
-    if (beforeKickboardCode !== rent.kickboardCode) {
-      if (beforeKickboardCode) {
-        await this.detachKickboard(rent, beforeKickboardCode);
+    const beforeRent = this.rentRepository.create(rent);
+    this.rentRepository.merge(rent, payload);
+    if (beforeRent.kickboardCode) {
+      if (
+        /** Rent has been cancelled or terminated */
+        this.detachStatus.includes(rent.status) ||
+        /** Or kickboard has been changed */
+        rent.kickboardCode !== beforeRent.kickboardCode
+      ) {
+        await this.detachKickboard(beforeRent);
       }
-
-      await this.attachKickboard(rent);
     }
 
-    if (updatedRent.status !== beforeStatus) {
-      updatedRent = await this.changeStatus(updatedRent, beforeStatus);
-      if (
-        updatedRent.status !== RentStatus.Cancelled &&
-        updatedRent.status !== RentStatus.Suspended
-      ) {
-        delete updatedRent.message;
+    if (rent.kickboardCode !== beforeRent.kickboardCode) {
+      if (rent.kickboardCode) await this.attachKickboard(rent);
+    } else if (rent.maxSpeed !== beforeRent.maxSpeed) {
+      await this.changeMaxSpeed(rent);
+    }
+
+    if (rent.status !== beforeRent.status) {
+      rent = await this.changeStatus(rent, beforeRent.status);
+      if (rent.message && !this.messageStatus.includes(rent.status)) {
+        this.logger.log(`Deleted the message of ${rent.name}(${rent.rentId})`);
+        delete rent.message;
       }
 
       this.logger.log(
-        `${rent.name}(${rent.rentId}) has changed status from ${beforeStatus} to ${updatedRent.status}`,
+        `${rent.name}(${rent.rentId}) has changed status from ${beforeRent.status} to ${rent.status}`,
       );
     }
 
-    return updatedRent.save();
+    return rent.save();
   }
 
   async terminate(rent: Rent): Promise<Rent> {
@@ -442,8 +451,12 @@ export class RentService {
   async attachKickboard(rent: Rent): Promise<void> {
     const { kickboardCode } = rent;
     if (!kickboardCode) throw Opcode.NoKickboardInRent();
-    const status = Not(In([RentStatus.Terminated, RentStatus.Cancelled]));
-    const count = await this.rentRepository.count({ kickboardCode, status });
+    const count = await this.rentRepository.count({
+      rentId: Not(rent.rentId),
+      kickboardCode: kickboardCode,
+      status: Not(In([RentStatus.Terminated, RentStatus.Cancelled])),
+    });
+
     if (count > 0) throw Opcode.AlreadyAssignmentKickboard();
     const kickboard = await this.getKickboard(kickboardCode, true);
     await kickboard.update({
@@ -456,10 +469,17 @@ export class RentService {
     );
   }
 
-  async detachKickboard(rent: Rent, kickboardCode?: string): Promise<void> {
+  async changeMaxSpeed(rent: Rent): Promise<void> {
+    const kickboard = await this.getKickboard(rent.kickboardCode, true);
+    await kickboard.update({ maxSpeed: rent.maxSpeed });
+    this.logger.log(
+      `${rent.name}(${rent.rentId}) has been change speed to ${rent.maxSpeed}KM`,
+    );
+  }
+
+  async detachKickboard(rent: Rent): Promise<void> {
     try {
-      kickboardCode = kickboardCode || rent.kickboardCode;
-      const kickboard = await this.getKickboard(kickboardCode);
+      const kickboard = await this.getKickboard(rent.kickboardCode);
       await kickboard.update({
         mode: InternalKickboardMode.COLLECTED,
         maxSpeed: null,
@@ -479,7 +499,6 @@ export class RentService {
     rent.status = RentStatus.Cancelled;
     rent.cancelledAt = new Date();
 
-    if (rent.kickboardCode) await this.detachKickboard(rent);
     if (refund) {
       const reason = rent.message;
       const payments = await this.getPayments(rent);
