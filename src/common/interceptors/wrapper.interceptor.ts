@@ -24,8 +24,12 @@ export class WrapperInterceptor implements NestInterceptor {
         return throwError(() => error(err.details));
       }
 
-      const eventId = Sentry.captureException(err);
-      return throwError(() => Opcode.InvalidError({ eventId }));
+      if (err.name !== 'HttpException') {
+        const eventId = Sentry.captureException(err);
+        return throwError(() => Opcode.InvalidError({ eventId }));
+      }
+
+      return throwError(() => err);
     });
 
     return next.handle().pipe(errorPipe).pipe(pipe);
