@@ -9,6 +9,7 @@ import { AppModule } from './app/app.module';
 import { WrapperInterceptor } from './common/interceptors/wrapper.interceptor';
 import { validationPipe } from './common/pipes/validation.pipe';
 import { setupSwagger, transferSwaggerPath } from './common/swagger';
+import * as Sentry from '@sentry/node';
 
 declare global {
   // eslint-disable-next-line no-var
@@ -17,6 +18,7 @@ declare global {
 
 async function bootstrap(isServerless = false) {
   const app = await NestFactory.create(AppModule);
+  Sentry.init({ tracesSampleRate: 1.0 });
 
   app.use(helmet());
   app.use(compression());
