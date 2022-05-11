@@ -10,7 +10,7 @@ import { AuthModule } from '../auth/auth.module';
 import { SessionModule } from '../auth/session/session.module';
 import { CardModule } from '../card/card.module';
 import { LoggerMiddleware } from '../common/middlewares/logger.middleware';
-import { DatabaseModule } from '../database/database.module';
+import { DatabaseModule } from '../common/modules/database.module';
 import { InternalModule } from '../internal/internal.module';
 import { PricingModule } from '../pricing/pricing.module';
 import { RentModule } from '../rent/rent.module';

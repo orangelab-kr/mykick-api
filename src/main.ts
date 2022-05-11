@@ -9,7 +9,6 @@ import { AppModule } from './app/app.module';
 import { WrapperInterceptor } from './common/interceptors/wrapper.interceptor';
 import { validationPipe } from './common/pipes/validation.pipe';
 import { setupSwagger, transferSwaggerPath } from './common/swagger';
-import { RentService } from './rent/rent.service';
 
 declare global {
   // eslint-disable-next-line no-var
