@@ -1,7 +1,7 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import dayjs from 'dayjs';
-import _, { before } from 'lodash';
+import _ from 'lodash';
 import {
   InternalKickboard,
   InternalKickboardMode,
@@ -386,6 +386,7 @@ export class RentService {
   async update(rent: Rent, payload: UpdateRentDto): Promise<Rent> {
     const beforeRent = this.rentRepository.create(rent);
     this.rentRepository.merge(rent, payload);
+    if (rent.maxSpeed >= 25) rent.maxSpeed = null;
     if (beforeRent.kickboardCode) {
       if (
         /** Rent has been cancelled or terminated */
