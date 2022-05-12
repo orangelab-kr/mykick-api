@@ -168,7 +168,7 @@ export class RentService {
   }
 
   async control(rent: Rent, enabled: boolean): Promise<Rent> {
-    if (rent.status === RentStatus.Cancelled) throw Opcode.RentHasSuspended();
+    if (rent.status !== RentStatus.Activated) throw Opcode.RentHasSuspended();
     const kickboard = await this.getKickboard(rent.kickboardCode);
     if (enabled) {
       await kickboard.start();
@@ -202,7 +202,7 @@ export class RentService {
     return rent;
   }
 
-  async isHaveInsurance(rent: Rent): Promise<boolean> {
+  isHaveInsurance(rent: Rent): boolean {
     const isMySafe = (addon) => addon.name.includes('마이세이프');
     return !!rent.addons.find(isMySafe);
   }
