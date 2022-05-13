@@ -299,15 +299,11 @@ export class RentService {
     kickboardCode: string,
     bypassModeValidate = false,
   ): Promise<InternalKickboard> {
-    try {
-      const client = InternalClient.getKickboard();
-      const kickboard = await client.getKickboard(kickboardCode);
-      const validateMode = kickboard.mode !== InternalKickboardMode.MYKICK;
-      if (!bypassModeValidate && validateMode) throw Error();
-      return kickboard;
-    } catch (err) {
-      throw Opcode.NoKickboardInRent();
-    }
+    const client = InternalClient.getKickboard();
+    const kickboard = await client.getKickboard(kickboardCode);
+    const validateMode = kickboard.mode !== InternalKickboardMode.MYKICK;
+    if (!bypassModeValidate && validateMode) throw Opcode.NoKickboardInRent();
+    return kickboard;
   }
 
   async remove(rent: Rent) {
@@ -386,7 +382,6 @@ export class RentService {
   async update(rent: Rent, payload: UpdateRentDto): Promise<Rent> {
     const beforeRent = this.rentRepository.create(rent);
     this.rentRepository.merge(rent, payload);
-    if (rent.maxSpeed >= 25) rent.maxSpeed = null;
     if (beforeRent.kickboardCode) {
       if (
         /** Rent has been cancelled or terminated */
